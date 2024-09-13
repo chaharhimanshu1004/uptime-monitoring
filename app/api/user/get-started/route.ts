@@ -9,13 +9,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validateData = emailSchema.parse(body.email);
     const email = validateData;
-
-    const user = await prisma.user.findUnique({where: {email: email}});
+    const user = await prisma.user.findUnique({where: { email: email }});
 
     if(!user){
-        return NextResponse.redirect('/onboarding/signup', { status: 302 });
+        return NextResponse.redirect('/onboarding/sign-up', { status: 302 });
     }
-
     if(!user.isVerified){
         return NextResponse.redirect('/onboarding/verify-email', { status: 302 });
     }
@@ -28,6 +26,7 @@ export async function POST(request: Request) {
       const errorMessages = err.errors.map((error) => error.message);
       return NextResponse.json({ err: errorMessages }, { status: 400 });
     }
+    console.error("Prisma error: ", err); // Log the actual error
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
