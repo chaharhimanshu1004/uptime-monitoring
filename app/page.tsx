@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
-import axios from "axios";
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const router = useRouter();
 
-  const handleClick = async (e: any) => {
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     
     if (!email) {
@@ -16,7 +17,6 @@ export default function Home() {
     }
 
     try {
-      console.log("here")
       const response = await fetch('/api/user/get-started', {
         method: 'POST',
         headers: {
@@ -24,17 +24,21 @@ export default function Home() {
         },
         body: JSON.stringify({ email }),
       });
-      console.log("here again")
 
-      const data = await response.json();
-      console.log(data);
-
-    } catch (err: any) {
-      if (err.response?.data?.err) {
-        setError(err.response.data.err);
+      if (response.redirected) {
+        router.push(response.url);
+      } else if (response.ok) {
+        const data = await response.json();
+        setSuccess("Request processed successfully.");
+        console.log(data);
       } else {
-        setError("An error occurred while processing your request.");
+        const errorData = await response.json();
+        setError(errorData.errors?.[0] || errorData.error || "An error occurred.");
       }
+
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred while processing your request.");
     }
   };
 

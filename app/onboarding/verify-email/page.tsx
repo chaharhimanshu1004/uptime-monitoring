@@ -9,16 +9,13 @@ export default function VerifyEmailPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Basic client-side validation
+
     if (otp.length !== 6 || isNaN(Number(otp))) {
       setError('Please enter a valid 6-digit OTP.');
       return;
     }
-    // Add your OTP verification logic here
     console.log('OTP:', otp);
-    // Reset error
     setError('');
-    // Update message if needed
     setMessage('Your OTP has been verified successfully.');
   };
 
