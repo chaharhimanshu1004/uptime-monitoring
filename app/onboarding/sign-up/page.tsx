@@ -1,6 +1,7 @@
 // pages/signup.tsx
 "use client"
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -9,19 +10,26 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    // Basic client-side validation
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
-    // Add your signup logic here
-    console.log('Name:', name);
-    console.log('Email:', email);
-    console.log('Password:', password);
-    // Reset error
-    setError('');
+    try{
+      const response = await fetch('/api/user/sign-up', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+      
+    }catch(err){
+      console.log("error occured while signing you up!",err);
+      setError("An error occurred while signing you up!");
+    }
   };
 
   return (
