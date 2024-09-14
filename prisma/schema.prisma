@@ -22,7 +22,6 @@ model User {
   phone     String?  @unique
   isVerified  Boolean  @default(false)
   verificationCode     String?  @unique
-  verificationCodeExpiry DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   websites  Website[]
