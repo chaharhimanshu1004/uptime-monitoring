@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ err: errorMessages }, { status: 400 });
     }
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Internal Server Error, Failed to get-started" },
       { status: 500 }
     );
   }

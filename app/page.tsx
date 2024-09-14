@@ -38,7 +38,7 @@ export default function Home() {
 
     } catch (err) {
       console.error(err);
-      setError("An error occurred while processing your request.");
+      setError("An error occurred while getting you on board");
     }
   };
 
