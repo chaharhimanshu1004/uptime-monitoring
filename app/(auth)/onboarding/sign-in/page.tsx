@@ -1,21 +1,89 @@
-"use client";
-import { useSession, signIn, signOut } from "next-auth/react";
-export default function Component() {
-  const { data: session } = useSession();
-  if (session) {
-    return (
-      <>
-        Signed in as {session.user.email} <br />
-        <button onClick={() => signOut()}>Sign out</button>
-      </>
-    );
-  }
-  return (
-    <>
-      Not signed in <br />
+"use client"
 
-      <button  className="bg-orange-500 px-3 py-2 m-4 rounded-lg"
-       onClick={() => signIn()}>Sign in</button>
-    </>
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function SignupPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async(e: React.FormEvent) => {
+    e.preventDefault();
+    try{
+      const result = await signIn('credentials',{
+        redirect: false,
+        identifier: email,
+        password : password,
+      })
+      if(result?.error){
+        setError(result.error); // add toast here
+        return;
+      }
+      if(result?.url){
+        router.replace('/dashboard');
+      }
+
+      
+    }catch(err){
+      console.log("error occured while signing you up!",err);
+      setError("An error occurred while signing you up!");
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold mb-6 text-center">Sign In</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-gray-700">Name</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-gray-700">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-gray-700">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Sign Up
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }

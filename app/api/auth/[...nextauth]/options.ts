@@ -19,7 +19,7 @@ export const authoptions: NextAuthOptions = {
                 try{
                     const user = await prisma.user.findUnique({
                         where: {
-                            email: credentials.email
+                            email: credentials.identifier
                         }
                     });
                     if(!user){
@@ -34,6 +34,7 @@ export const authoptions: NextAuthOptions = {
                     if(!isPasswordCorrect){
                         throw new Error('Invalid Password!');
                     }
+                    console.log("here we cameeee");
 
                     return user;
 
