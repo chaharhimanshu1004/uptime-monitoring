@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     if(!user.isVerified){
         return NextResponse.redirect(new URL('/onboarding/verify-email', request.url));
     }
-    return NextResponse.redirect(new URL('/onboarding/login', request.url));
+    return NextResponse.redirect(new URL('/onboarding/sign-in', request.url));
     
    
   } catch (err) {

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     if(userExistAndVerified){
-        return NextResponse.redirect(new URL('/onboarding/login', request.url),{ status: 302 });
+        return NextResponse.redirect(new URL('/onboarding/sign-in', request.url),{ status: 302 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
