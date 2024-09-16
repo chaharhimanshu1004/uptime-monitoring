@@ -8,7 +8,6 @@ export async function POST(request: Request) {
           email
       }
     });
-    console.log("here---")
 
     if (!user) {
       return Response.json(

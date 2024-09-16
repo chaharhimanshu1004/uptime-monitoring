@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { emailSchema } from "@/zodSchemas/signupSchema";
-import { redirect } from 'next/navigation'
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
