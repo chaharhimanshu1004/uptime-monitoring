@@ -5,9 +5,10 @@ export async function POST(request: Request) {
     const { email, code } = await request.json();
     const user = await prisma.user.findUnique({
       where: {
-        email,
-      },
+          email
+      }
     });
+    console.log("here---")
 
     if (!user) {
       return Response.json(
@@ -20,33 +21,35 @@ export async function POST(request: Request) {
         }
       );
     }
-
     const isCodeValid = user.verificationCode === code;
-    if (isCodeValid) {
-      await prisma.user.update({
-        where: {
-          email,
+    if (!isCodeValid) {
+      return Response.json(
+        {
+          success: false,
+          message: "Invalid code",
         },
-        data: {
-          isVerified: true,
-        },
-      });
-
-      return Response.json({
-        success: true,
-        message: "Email verified successfully",
-      });
+        {
+          status: 400,
+        }
+      );
+      
     }
 
-    return Response.json(
-      {
-        success: false,
-        message: "Invalid code",
+    await prisma.user.update({
+      where: {
+        email,
       },
-      {
-        status: 400,
-      }
-    );
+      data: {
+        isVerified: true,
+      },
+    });
+
+    return Response.json({
+      success: true,
+      message: "Email verified successfully",
+    });
+
+    
   } catch (error: any) {
     console.log("Error verifying code", error);
     return Response.json(
