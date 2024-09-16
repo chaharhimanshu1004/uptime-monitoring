@@ -71,7 +71,7 @@ export const authoptions: NextAuthOptions = {
 
     },
     pages: {
-        signIn: '/sign-in',
+        signIn: '/onboarding/sign-in',
     },
     session: {
         strategy: 'jwt', // the person who has the token, is the user
