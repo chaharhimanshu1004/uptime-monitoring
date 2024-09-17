@@ -34,7 +34,6 @@ export const authoptions: NextAuthOptions = {
                     if(!isPasswordCorrect){
                         throw new Error('Invalid Password!');
                     }
-                    console.log("here we cameeee");
 
                     return user;
 
@@ -53,7 +52,7 @@ export const authoptions: NextAuthOptions = {
             // yes payload size will be bigger but its okay when we dont need to fetch the user everytime
             // same for session, put everything there, and whenever we have the session access or token access, we can fetch the data whenever we feel
             if(user){
-                token._id = user._id?.toString();
+                token.id = user.id?.toString();
                 token.isVerified = user.isVerified;
                 token.name = user.name;
              }
@@ -62,7 +61,7 @@ export const authoptions: NextAuthOptions = {
         },
         async session({session, token}) {
             if(token){
-                session.user._id = token._id;
+                session.user.id = token.id;
                 session.user.isVerified = token.isVerified;
                 session.user.name = token.name;
             }
