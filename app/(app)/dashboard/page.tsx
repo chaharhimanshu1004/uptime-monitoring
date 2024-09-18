@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import React from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { User } from 'next-auth' // this is the user next-auth returns after the authentication

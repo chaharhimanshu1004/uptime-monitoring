@@ -24,6 +24,7 @@ export default function SignupPage() {
         },
         body: JSON.stringify({ name, email, password }),
       });
+      return response.json();
       
     }catch(err){
       console.log("error occured while signing you up!",err);

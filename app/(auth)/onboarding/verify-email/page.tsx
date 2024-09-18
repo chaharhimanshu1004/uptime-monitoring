@@ -7,16 +7,26 @@ export default function VerifyEmailPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('An OTP has been sent to your email. Please verify.');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (otp.length !== 6 || isNaN(Number(otp))) {
       setError('Please enter a valid 6-digit OTP.');
       return;
     }
-    console.log('OTP:', otp);
-    setError('');
-    setMessage('Your OTP has been verified successfully.');
+    try{
+      const result = await fetch('/api/user/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ otp }),
+      });
+
+
+    }catch(e){
+      setError('Invalid OTP');
+    }
   };
 
   return (
