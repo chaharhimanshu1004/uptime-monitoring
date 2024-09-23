@@ -41,7 +41,7 @@ export async function sendVerificationEmail(
     `,
   };
   try {
-    const result = await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     return {
       success: true,
       message: "Verifcation email send successfully, check your email!",
