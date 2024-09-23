@@ -21,9 +21,9 @@ async function addWebsiteToQueue(check: WebsiteCheck) {
 export async function extractWebsiteFromQueue(): Promise<WebsiteCheck | null> {
   const now = Date.now();
   const result = await redis.zrangebyscore(QUEUE_NAME, 0, now, "LIMIT", 0, 1);
-
-  if (result.length === 0) return null;
-
+  if (result.length === 0) {
+    return null;
+  }
   const check: WebsiteCheck = JSON.parse(result[0]);
   await redis.zrem(QUEUE_NAME, result[0]);
 
