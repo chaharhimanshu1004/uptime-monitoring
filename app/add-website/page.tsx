@@ -13,8 +13,8 @@ const Page = () => {
       body: JSON.stringify({ url: websiteUrl }),
     });
 
-    const data = await response.json();
-    console.log(data);
+    // const data = await response.json();
+    // console.log(data);
   }
 
   return (

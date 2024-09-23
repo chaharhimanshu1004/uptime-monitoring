@@ -2,7 +2,6 @@
 import { getServerSession } from "next-auth";
 import { authoptions } from "../../auth/[...nextauth]/options";
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
 import { User } from "next-auth";
 import { registerWebsite } from "@/lib/queue";
 export async function POST(request:Request){
@@ -26,20 +25,20 @@ export async function POST(request:Request){
         if (isNaN(dbUserId)) {
             return Response.json({ success: false, message: "Invalid user ID" }, { status: 400 });
         }
-        const website = await prisma.website.create({
-            data: {
-                url,
-                userId: dbUserId
-            }
-        });
-
+        
+        // const website = await prisma.website.create({
+        //     data: {
+        //         url,
+        //         userId: dbUserId
+        //     }
+        // });
+        
         await registerWebsite(url);
-        return Response.json({ success: true, website }, { status: 200 });
+        return Response.json({ success: true }, { status: 200 });
     }catch(error : any){
         return Response.json({ success: false, message: error.message }, { status: 500 });
     }
-
-
-
 }
+
+
 
