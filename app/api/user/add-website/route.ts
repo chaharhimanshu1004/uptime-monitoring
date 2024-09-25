@@ -33,7 +33,7 @@ export async function POST(request:Request){
         //     }
         // });
         
-        await registerWebsite(url);
+        await registerWebsite(url, user.id as string,user.email as string);
         return Response.json({ success: true }, { status: 200 });
     }catch(error : any){
         return Response.json({ success: false, message: error.message }, { status: 500 });
