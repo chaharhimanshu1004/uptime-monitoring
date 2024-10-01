@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import { FeaturesSectionDemo } from "./acertinity-components/get-started";
+
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -44,6 +46,7 @@ export default function Home() {
 
   return (
     <div>
+      <FeaturesSectionDemo/>
       <div className="flex mt-40 flex-col items-center justify-center p-4 bg-gray-100 rounded-lg shadow-md max-w-sm mx-auto">
         <input
           type="text"
