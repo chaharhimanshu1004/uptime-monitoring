@@ -1,6 +1,6 @@
 "use client";
 
-import { FeaturesSectionDemo } from "./acertinity-components/Feature-section";
+import { FeaturesSectionDemo } from "../acertinity-components/Feature-section";
 import GetStarted from "@/components/GetStarted";
 export default function Home() {
 

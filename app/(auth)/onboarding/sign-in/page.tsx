@@ -4,8 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function SignupPage() {
-  const [name, setName] = useState('');
+export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,74 +12,60 @@ export default function SignupPage() {
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    try{
-      const result = await signIn('credentials',{
+    try {
+      const result = await signIn('credentials', {
         redirect: false,
-        identifier: email,
-        password : password,
-      })
-      if(result?.error){
+        email: email,
+        password: password,
+      });
+      if (result?.error) {
         setError(result.error); // add toast here
         return;
       }
-      if(result?.url){
+      if (result?.url) {
         router.replace('/dashboard');
       }
-
-      
-    }catch(err){
-      console.log("error occured while signing you up!",err);
-      setError("An error occurred while signing you up!");
+    } catch(err) {
+      console.log("Error occurred while signing in!", err);
+      setError("An error occurred while signing in!");
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+    <div className="flex items-center justify-center min-h-screen bg-black text-white">
+      <div className="w-full max-w-md bg-neutral-900 p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold mb-6 text-center">Sign In</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-700">Name</label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your name"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700">Email</label>
+            <label htmlFor="email" className="block text-neutral-300">Email</label>
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-600 text-white"
               placeholder="Enter your email"
               required
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-700">Password</label>
+            <label htmlFor="password" className="block text-neutral-300">Password</label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-600 text-white"
               placeholder="Enter your password"
               required
             />
           </div>
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+          {error && <p className="text-red-400 text-center mb-4">{error}</p>}
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-neutral-700 text-white font-semibold rounded-md shadow-sm hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-500"
           >
-            Sign Up
+            Sign In
           </button>
         </form>
       </div>
