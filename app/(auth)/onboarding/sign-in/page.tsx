@@ -18,6 +18,7 @@ export default function SignInPage() {
         email: email,
         password: password,
       });
+      console.log(result);
       if (result?.error) {
         setError(result.error); // add toast here
         return;

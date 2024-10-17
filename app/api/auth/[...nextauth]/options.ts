@@ -19,7 +19,7 @@ export const authoptions: NextAuthOptions = {
                 try{
                     const user = await prisma.user.findUnique({
                         where: {
-                            email: credentials.identifier
+                            email: credentials.email
                         }
                     });
                     if(!user){
@@ -39,6 +39,7 @@ export const authoptions: NextAuthOptions = {
 
 
                 }catch(error:any){
+                    console.log(error);
                     throw new Error('Invalid credentials',error);
                 }
             }
@@ -51,6 +52,7 @@ export const authoptions: NextAuthOptions = {
             // but we will be putting the email and name other stuffs as well so that we dont require to fetch the user from the database everytime,
             // yes payload size will be bigger but its okay when we dont need to fetch the user everytime
             // same for session, put everything there, and whenever we have the session access or token access, we can fetch the data whenever we feel
+            
             if(user){
                 token.id = user.id?.toString();
                 token.isVerified = user.isVerified;
