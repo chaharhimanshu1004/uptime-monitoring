@@ -4,7 +4,7 @@ import { authoptions } from '../auth/[...nextauth]/options';
 import redis from '@/lib/redis';
 
 const CHANNEL_NAME = 'website_status';
-const POLLING_TIMEOUT = 30000;
+const POLLING_TIMEOUT = 10000;
 
 export async function GET(request: NextRequest) {
     const session = await getServerSession(authoptions);
