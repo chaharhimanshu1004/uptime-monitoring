@@ -29,7 +29,8 @@ export function websiteStatus() {
           if (data.success && data.message) {
             const { url, status } = data.message;
             setStatuses(prevStatuses => {
-              return [...prevStatuses.filter(s => s.url !== url), { url, status }];
+              const updatedStatuses = [...prevStatuses.filter(s => s.url !== url), { url, status }];
+              return updatedStatuses;
             });
           }
         } catch (error) {
