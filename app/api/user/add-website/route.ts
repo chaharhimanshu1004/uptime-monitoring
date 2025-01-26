@@ -25,16 +25,14 @@ export async function POST(request:Request){
         if (isNaN(dbUserId)) {
             return Response.json({ success: false, message: "Invalid user ID" }, { status: 400 });
         }
-        
-        // const website = await prisma.website.create({
-        //     data: {
-        //         url,
-        //         userId: dbUserId
-        //     }
-        // });
-        
+        const website = await prisma.website.create({
+            data: {
+                url,
+                userId: dbUserId
+            }
+        });
         await registerWebsite(url, user.id as string,user.email as string);
-        return Response.json({ success: true }, { status: 200 });
+        return Response.json({ success: true , website:website }, { status: 200 });
     }catch(error : any){
         return Response.json({ success: false, message: error.message }, { status: 500 });
     }

@@ -11,7 +11,7 @@ const Page = () => {
 
   return (
     <div className="min-h-screen flex h-screen">
-      <div style={{ width: '15%', height: '100%' }} >
+      <div style={{ width: '15%', height: '100%' }}>
         <SidebarUptime />
       </div>
       <div style={{ width: '85%', height: '100%' }} >

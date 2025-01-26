@@ -5,6 +5,7 @@ export async function GET(request:Request){
     try{
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get("userId");
+        
         if(!userId){
             return {
                 success: false,
@@ -12,6 +13,7 @@ export async function GET(request:Request){
             }
         }
         const dbUserId = parseInt(userId as string);
+
         if (isNaN(dbUserId)) {
             return {
                 success: false,

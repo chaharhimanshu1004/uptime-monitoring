@@ -1,5 +1,8 @@
+"use client"
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { HeroHighlight,Highlight } from './ui/hero-highlight';
+import { motion } from 'framer-motion';
 
 const GetStarted = () => {
   const [email, setEmail] = useState('');
@@ -39,30 +42,40 @@ const GetStarted = () => {
     }
   };
 
+  // return (
+  //   // <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
+  //   //   <h1 className="text-4xl font-bold mb-8">Prevent Downtime! Yeahh</h1>
+  //   //     <div className="flex flex-col sm:flex-row gap-4">
+  //   //       <input
+  //   //         type="email"
+  //   //         value={email}
+  //   //         onChange={(e) => setEmail(e.target.value)}
+  //   //         placeholder="Enter your email"
+  //   //         className="flex-grow px-4 py-2 rounded-md text-black"
+  //   //         required
+  //   //       />
+  //   //       <button
+  //   //       onClick={handleSubmit}
+  //   //         type="submit"
+  //   //         className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
+  //   //       >
+  //   //         Get Started
+  //   //       </button>
+  //   //       {error && <p className="text-red-500 mt-2">{error}</p>}
+  //   //     </div>
+  //   // </div>
+  // );
 
   return (
-    <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold mb-8">Prevent Downtime</h1>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            className="flex-grow px-4 py-2 rounded-md text-black"
-            required
-          />
-          <button
-          onClick={handleSubmit}
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
-          >
-            Get Started
-          </button>
-          {error && <p className="text-red-500 mt-2">{error}</p>}
-        </div>
-    </div>
-  );
+    <HeroHighlight>
+      <motion.h1
+        className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto"
+      >
+        Prevent Downtime!!!
+        
+      </motion.h1>
+    </HeroHighlight>
+  )
 };
 
 export default GetStarted;
