@@ -15,6 +15,7 @@ export default function CreateMonitor() {
 
   const handleSubmit = async () => {
     try {
+      const url = new URL(websiteUrl);
       const response = await fetch("/api/user/add-website", {
         method: "POST",
         headers: {
@@ -36,7 +37,7 @@ export default function CreateMonitor() {
       {/* Breadcrumb Navigation */}
       <div className="border-b border-zinc-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4 flex items-center space-x-2 text-sm">
+          <div className="py-4 flex items-center space-x-2 text-md font-semibold">
             <Link href="/monitors" className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors">
               <Globe className="w-4 h-4" />
               Monitors
@@ -55,10 +56,10 @@ export default function CreateMonitor() {
           transition={{ duration: 0.5 }}
           className="space-y-6"
         >
-          <h1 className="text-3xl font-bold text-white">Create monitor</h1>
+          <h1 className="text-4xl font-bold text-white">Create monitor</h1>
 
           <div>
-            <h2 className="text-xl font-semibold text-white mb-2">What to monitor</h2>
+            <h2 className="text-2xl font-semibold text-white mb-2">What to monitor</h2>
             <p className="text-zinc-400">
               Configure the target website you want to monitor. You&apos;ll find the advanced configuration below, in
               the advanced settings section.
@@ -71,10 +72,10 @@ export default function CreateMonitor() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-zinc-400">Alert us when</label>
+                    <label className="text-md text-zinc-400">Alert us when</label>
                     <Info className="w-4 h-4 text-zinc-500" />
                   </div>
-                  <Badge className="bg-zinc-800 text-zinc-400 hover:bg-zinc-800">Billable</Badge>
+                  {/* <Badge className="bg-zinc-800 text-zinc-400 hover:bg-zinc-800">Billable</Badge> */}
                 </div>
                 <Select value={alertType} onValueChange={setAlertType}>
                   <SelectTrigger className="w-full bg-black/50 border-zinc-800 text-white focus:ring-0 focus:ring-offset-0">
@@ -92,7 +93,7 @@ export default function CreateMonitor() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-sm text-zinc-500">
+                <p className="text-md text-zinc-500">
                   We recommend the keyword matching method.{" "}
                   <Link href="/upgrade" className="text-purple-400 hover:text-purple-300 underline">
                     Upgrade your account to enable more options
@@ -104,7 +105,7 @@ export default function CreateMonitor() {
               {/* URL Input */}
               <div className="space-y-2 ">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-zinc-400">URL to monitor</label>
+                  <label className="text-md text-zinc-400">URL to monitor</label>
                   <Info className="w-4 h-4 text-zinc-500" />
                 </div>
                 <div className="relative border border-solid border-zinc-800 rounded-xl">
@@ -113,13 +114,13 @@ export default function CreateMonitor() {
                     value={websiteUrl}
                     onChange={(e) => setWebsiteUrl(e.target.value)}
                     className="w-full bg-black/50 border-zinc-800 pl-20 text-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-purple-500/50"
-                    placeholder="example.com"
+                    placeholder=" example.com"
                   />
                   <div className="absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none border-r border-zinc-800">
-                    <span className="text-sm text-zinc-500">https://</span>
+                    <span className="text-md text-zinc-500">https://</span>
                   </div>
                 </div>
-                <p className="text-sm text-zinc-500">
+                <p className="text-md text-zinc-500">
                   You can import multiple monitors{" "}
                   <Link href="/import" className="text-purple-400 hover:text-purple-300 underline">
                     here

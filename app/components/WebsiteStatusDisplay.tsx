@@ -33,10 +33,10 @@ export function WebsiteStatusDisplay() {
   }, [userId])
 
   const statuses = websiteStatus()
-  const firstName = user?.name?.split(" ")[0] || "User"
+  const firstName = user?.name?.split(" ")[0] || "User";
 
   return (
-    <div className="min-h-screen pt-12 bg-[#0A0A0B] px-16 text-white p-6">
+    <div className="min-h-screen pt-12 w-full bg-[#0A0A0B] px-16 text-white p-6">
       {/* Header */}
       <div className="flex items-center  justify-between mb-8">
         <h1 className="text-[25px]  font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
