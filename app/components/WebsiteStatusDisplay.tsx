@@ -6,8 +6,10 @@ import axios from "axios"
 import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useRouter } from 'next/navigation'
 
 export function WebsiteStatusDisplay() {
+  const router = useRouter();
   const { data: session } = useSession()
   const user = session?.user as User
   const [websites, setWebsites] = useState([])
@@ -51,7 +53,7 @@ export function WebsiteStatusDisplay() {
               className="w-80 bg-[#141417]/80 text-white border-0 pl-10 placeholder:text-gray-500 rounded-xl focus:bg-[#141417] transition-colors"
             />
           </div>
-          <Button className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] text-white gap-2 rounded-xl shadow-lg shadow-indigo-500/20">
+          <Button onClick={(e)=>router.push('/add-website')} className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] text-white gap-2 rounded-xl shadow-lg shadow-indigo-500/20">
             Create monitor
             <ChevronDown className="h-4 w-4" />
           </Button>

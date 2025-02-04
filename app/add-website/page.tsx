@@ -8,32 +8,68 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
+import { LoadingBar } from "../components/LoadingBar"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CreateMonitor() {
   const [websiteUrl, setWebsiteUrl] = useState("")
   const [alertType, setAlertType] = useState("unavailable")
+  const [urlError, setUrlError] = useState("")
+  const [loading,setLoading] = useState(false)
+  const { toast } = useToast()
 
   const handleSubmit = async () => {
+
     try {
-      const url = new URL(websiteUrl);
+      setUrlError("")
+      setLoading(true)
+      let normalizedUrl = websiteUrl.trim().toLowerCase();
+      if (normalizedUrl.startsWith('https://')) {
+        normalizedUrl = normalizedUrl.replace('https://', '');
+      }
+      if (normalizedUrl.startsWith('http://')) {
+        normalizedUrl = normalizedUrl.replace('http://', '');
+      }
+      const domainExtensions = ['.com', '.org', '.net', '.edu', '.gov', '.io', '.co', '.in'];
+      const hasValidExtension = domainExtensions.some(ext => normalizedUrl.endsWith(ext));
+
+      if (!hasValidExtension) {
+        setUrlError("Please enter a valid website URL with a domain extension (e.g., .com, .org)");
+        return;
+      }
+
       const response = await fetch("/api/user/add-website", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ url: websiteUrl }),
+        body: JSON.stringify({ url: `https://${normalizedUrl}` }),
       })
 
       if (!response.ok) {
         throw new Error("Failed to add website")
       }
+      toast({
+        title: "Website added successfully!!",
+      })
+      
     } catch (error) {
       console.error("Error adding website:", error)
+      toast({
+        title: "Failed to add the website",
+        description: "Please try again later!",
+        variant:"destructive"
+      })
+    }finally{
+      setLoading(false)
+      
+
     }
   }
 
   return (
     <div className="min-h-screen bg-black">
+      <LoadingBar isLoading={loading} />
       {/* Breadcrumb Navigation */}
       <div className="border-b border-zinc-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,11 +144,16 @@ export default function CreateMonitor() {
                   <label className="text-md text-zinc-400">URL to monitor</label>
                   <Info className="w-4 h-4 text-zinc-500" />
                 </div>
-                <div className="relative border border-solid border-zinc-800 rounded-xl">
+                <div className="relative border border-solid border-zinc-800 rounded-xl" 
+                    style={{borderColor: urlError ? 'red' : 'rgb(38 38 38)'}}>
                   <Input
                     type="url"
                     value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    onChange={(e) => {
+                      setWebsiteUrl(e.target.value)
+                      setUrlError("");
+                    }}
+                    
                     className="w-full bg-black/50 border-zinc-800 pl-20 text-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-purple-500/50"
                     placeholder=" example.com"
                   />
@@ -120,6 +161,12 @@ export default function CreateMonitor() {
                     <span className="text-md text-zinc-500">https://</span>
                   </div>
                 </div>
+                {urlError && (
+                  <div className="flex items-center gap-2 text-red-500 text-sm mt-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {urlError}
+                  </div>
+                )}
                 <p className="text-md text-zinc-500">
                   You can import multiple monitors{" "}
                   <Link href="/import" className="text-purple-400 hover:text-purple-300 underline">
