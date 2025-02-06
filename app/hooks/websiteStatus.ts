@@ -27,9 +27,9 @@ export function websiteStatus() {
           const data = await response.json();
           
           if (data.success && data.message) {
-            const { url, status } = data.message;
+            const { url, status , id } = data.message;
             setStatuses(prevStatuses => {
-              const updatedStatuses = [...prevStatuses.filter(s => s.url !== url), { url, status }];
+              const updatedStatuses = [...prevStatuses.filter(s => s.url !== url), { id, url, status }];
               return updatedStatuses;
             });
           }

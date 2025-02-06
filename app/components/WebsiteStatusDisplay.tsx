@@ -32,14 +32,18 @@ export function WebsiteStatusDisplay() {
     } catch (err) {
       console.log("Error in fetchWebsites", err)
     }
-  }, [userId])
+  }, [userId]);
 
+
+  const handleWebsiteClick = (id : string | number) =>{
+    router.push(`/monitor/${id}`)
+  }
+ 
   const statuses = websiteStatus()
   const firstName = user?.name?.split(" ")[0] || "User";
 
   return (
     <div className="min-h-screen pt-12 w-full bg-[#0A0A0B] px-16 text-white p-6">
-      {/* Header */}
       <div className="flex items-center  justify-between mb-8">
         <h1 className="text-[25px]  font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Greetings, {firstName}
@@ -90,7 +94,9 @@ export function WebsiteStatusDisplay() {
             {statuses.map((website: any) => (
               <div
                 key={website.id}
-                className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group"
+                onClick={()=>handleWebsiteClick(website.id)}
+
+                className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group hover:cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                 <span className="relative flex items-center justify-center w-3 h-3"><span className="absolute inline-flex w-full h-full duration-1000 bg-green-400 rounded-full opacity-75 animate-ping"></span><span className="relative inline-flex w-2 h-2 bg-green-500 rounded-full"></span></span>
