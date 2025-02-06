@@ -1,21 +1,20 @@
 import redis from "./redis";
-import { randomUUID } from "node:crypto";
 
 const QUEUE_NAME = "uptime-monitoring-queue";
 // const USER_WEBSITES_SET = "user-websites:";
 
 interface WebsiteCheck {
-  id: string,
+  id: number,
   url: string;
   nextCheckTime: number;
   userId: string;
   userEmail: string;
 }
 
-export async function registerWebsite(url: string,userId:string,userEmail:string) {
+export async function registerWebsite(url: string,userId:string,userEmail:string,websiteId:number) {
   const initialCheckTime = Date.now();
   // await addWebsiteToQueue({ url, nextCheckTime: initialCheckTime,userId });
-  const check: WebsiteCheck = { url, nextCheckTime: initialCheckTime, userId,userEmail , id: randomUUID() };
+  const check: WebsiteCheck = { url, nextCheckTime: initialCheckTime, userId,userEmail , id: websiteId };
   await addWebsiteToQueue(check);
   // await Promise.all([
   //   addWebsiteToQueue(check),
