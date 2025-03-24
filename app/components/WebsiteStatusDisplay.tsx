@@ -8,11 +8,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from 'next/navigation'
 
+interface Website {
+  id: string | number;        
+  url: string;        
+  userId: string | number;     
+  updatedAt: Date;   
+  createdAt: Date;    
+}
+
 export function WebsiteStatusDisplay() {
   const router = useRouter();
   const { data: session } = useSession()
   const user = session?.user as User
-  const [websites, setWebsites] = useState([])
+  const [websites, setWebsites] = useState<Website[]>([]);
   let userId: string | number | undefined = user?.id
 
   if (userId) {
@@ -39,7 +47,7 @@ export function WebsiteStatusDisplay() {
     router.push(`/monitor/${id}`)
   }
  
-  const statuses = websiteStatus()
+  // const statuses = websiteStatus() 
   const firstName = user?.name?.split(" ")[0] || "User";
 
   return (
@@ -91,9 +99,9 @@ export function WebsiteStatusDisplay() {
           </div>
         ) : (
           <div className="divide-y divide-[#232328]">
-            {statuses.map((website: any) => (
+            {websites.map((website: Website, index:any) => (
               <div
-                key={website.id}
+                key={index}
                 onClick={()=>handleWebsiteClick(website.id)}
                 className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group hover:cursor-pointer"
               >
