@@ -36,10 +36,10 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
     }, [websiteId, period])
 
     const uptime =
-        stats.length > 0 ? ((stats.filter((s) => s.status === "up").length / stats.length) * 100).toFixed(2) : "0"
+        stats?.length > 0 ? ((stats.filter((s) => s.status === "up").length / stats.length) * 100).toFixed(2) : "0"
 
     const avgResponseTime =
-        stats.length > 0 ? (stats.reduce((acc, s) => acc + s.responseTime, 0) / stats.length).toFixed(2) : "0"
+        stats?.length > 0 ? (stats.reduce((acc, s) => acc + s.responseTime, 0) / stats.length).toFixed(2) : "0"
 
     const chartConfig = {
         responseTime: {

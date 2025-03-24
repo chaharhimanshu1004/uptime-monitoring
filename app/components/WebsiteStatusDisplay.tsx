@@ -95,7 +95,6 @@ export function WebsiteStatusDisplay() {
               <div
                 key={website.id}
                 onClick={()=>handleWebsiteClick(website.id)}
-
                 className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group hover:cursor-pointer"
               >
                 <div className="flex items-center gap-3">

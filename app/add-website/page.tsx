@@ -62,8 +62,6 @@ export default function CreateMonitor() {
       })
     }finally{
       setLoading(false)
-      
-
     }
   }
 
