@@ -5,15 +5,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Gauge, User2, Settings, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
+import { signOut } from "next-auth/react"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem} from "@/components/ui/sidebar"
+import { useRouter } from "next/navigation"
 
 const menuItems = [
   {
@@ -35,6 +29,12 @@ const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.replace('/');
+  }
 
   return (
     <Sidebar className="border-r border-white/[0.08] bg-[#121212] backdrop-blur-xl">
@@ -75,7 +75,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="px-2 py-4">
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem onClick={handleLogout} >
             <SidebarMenuButton className="group relative h-11 w-full overflow-hidden rounded-lg px-3 text-zinc-400/90 transition-colors hover:text-white hover:bg-gradient-to-r hover:from-[#4338CA] hover:to-[#6D28D9]">
               <span className="relative flex items-center gap-3">
                 <LogOut className="h-5 w-5" />

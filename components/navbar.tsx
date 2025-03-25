@@ -56,11 +56,9 @@ export function Navbar() {
           />
         </div>
 
-        {/* Center content */}
         <div className="flex-1 bg-zinc-900/80 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16 relative">
-              {/* Logo */}
               <div className="flex-shrink-0">
                 <Link href="/" className="flex items-center">
                   <span className="text-xl font-semibold bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 text-transparent bg-clip-text">
@@ -69,7 +67,6 @@ export function Navbar() {
                 </Link>
               </div>
 
-              {/* Navigation Items */}
               <div className="hidden md:flex items-center space-x-4">
                 {navItems.map((item) => (
                   <Link
@@ -85,20 +82,18 @@ export function Navbar() {
                 ))}
               </div>
 
-              {/* Auth Buttons */}
               <div className="hidden md:flex items-center space-x-4">
-                <Link href="/signin" className="text-sm text-zinc-400 hover:text-white transition-colors">
+                <Link href="/onboarding/sign-in" className="text-sm text-zinc-400 hover:text-white transition-colors">
                   Sign in
                 </Link>
                 <Link
-                  href="/signup"
+                  href="/onboarding/sign-up"
                   className="inline-flex items-center justify-center h-8 px-4 text-sm font-medium text-white transition-colors bg-gradient-to-r from-fuchsia-500 to-cyan-500 rounded-lg hover:opacity-90"
                 >
                   Sign up
                 </Link>
               </div>
 
-              {/* Custom border that spans only the navigation area */}
               <div
                 className="absolute bottom-0 h-px bg-zinc-800/50"
                 style={{
