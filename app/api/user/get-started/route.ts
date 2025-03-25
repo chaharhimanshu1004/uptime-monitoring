@@ -10,11 +10,8 @@ export async function POST(request: Request) {
     const email = validateData;
     const user = await prisma.user.findUnique({where: { email: email }});
 
-    if(!user){
+    if(!user || !user.isVerified){
       return NextResponse.redirect(new URL('/onboarding/sign-up', request.url));
-    }
-    if(!user.isVerified){
-        return NextResponse.redirect(new URL('/onboarding/verify-email', request.url));
     }
     return NextResponse.redirect(new URL('/onboarding/sign-in', request.url));
     

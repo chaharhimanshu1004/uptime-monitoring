@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const user = await prisma.user.findUnique({where: { email: email }});
     const userExistButNotVerified = await prisma.user.findUnique({where: { email: email, isVerified: false }});
     const userExistAndVerified = await prisma.user.findUnique({where: { email: email, isVerified: true }});
-    if(user){
+    if(user && user.isVerified){
       return NextResponse.json({ error: "User already exists with the email" }, { status: 400 });
     }
 

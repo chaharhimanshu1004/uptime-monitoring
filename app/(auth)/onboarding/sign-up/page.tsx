@@ -28,13 +28,7 @@ export default function SignupPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, password }),
-      })
-      const data = await response.json()
-      if (response.ok) {
-        router.push("/signin") // Redirect to sign in page after successful signup
-      } else {
-        setError(data.error || "An error occurred during signup.")
-      }
+      })     
     } catch (err) {
       console.log("Error occurred while signing you up!", err)
       setError("An error occurred while signing you up!")
@@ -128,7 +122,7 @@ export default function SignupPage() {
             Sign Up
           </Button>
         </form>
-        <p className="mt-4 text-center text-sm text-zinc-400">
+        <p className="mt-4 text-center font-semibold text-md text-zinc-400">
           Already have an account?{" "}
           <a href="/signin" className="font-medium text-purple-500 hover:text-purple-400">
             Sign in

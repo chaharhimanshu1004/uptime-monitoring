@@ -3,6 +3,15 @@ import prisma from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
     const { email, code } = await request.json();
+    if (!email || !code) {
+      return Response.json({
+        success: false,
+        message: "Please enter valid email and code",
+      },
+        {
+          status: 400
+        })
+    }
     const user = await prisma.user.findUnique({
       where: {
           email
@@ -20,7 +29,7 @@ export async function POST(request: Request) {
         }
       );
     }
-    const isCodeValid = user.verificationCode === code;
+    const isCodeValid = user.verificationCode && user.verificationCode == code;
     if (!isCodeValid) {
       return Response.json(
         {

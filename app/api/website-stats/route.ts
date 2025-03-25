@@ -49,8 +49,6 @@ export async function GET(request: NextRequest) {
         timestamp: "asc",
       },
     })
-
-    console.log('>>>stats are here brother', stats);
   
     return NextResponse.json({ stats })
   }
