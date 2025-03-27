@@ -30,7 +30,7 @@ const GetStarted = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-3xl md:text-4xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 tracking-tight"
+            className="text-2xl md:text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 tracking-tight"
           >
             Uptime Monitoring
           </motion.div>
@@ -39,7 +39,7 @@ const GetStarted = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl px-4 md:text-4xl lg:text-5xl font-bold text-white max-w-4xl text-center mx-auto leading-tight"
+            className="text-4xl px-4 md:text-5xl lg:text-6xl font-bold text-white max-w-4xl text-center mx-auto leading-tight"
           >
             Always On, Always Watching
           </motion.h1>

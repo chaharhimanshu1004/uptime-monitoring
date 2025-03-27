@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 const navItems = [
   {
@@ -47,9 +46,19 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 flex"
     >
       <div className="w-full flex">
-        {/* Left dotted section with seamless blend */}
         <div className="relative w-[130px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a1a1a_1.5px,transparent_1.5px)] [background-size:24px_24px] bg-zinc-950/30 backdrop-blur-sm" />
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+
+          <div className="absolute inset-0 bg-gradient-radial from-purple-900/30 via-background to-background" />
+
+          <div className="absolute top-0 left-0 w-full h-full bg-purple-600/10 blur-[50px] rounded-full" />
+
           <div
             className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[rgba(0,0,0,0)] to-[rgba(24,24,27,0.8)]"
             style={{ maskImage: "linear-gradient(to right, transparent, black)" }}
@@ -105,9 +114,19 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Right dotted section with seamless blend */}
         <div className="relative w-[130px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a1a1a_1.5px,transparent_1.5px)] [background-size:24px_24px] bg-zinc-950/30 backdrop-blur-sm" />
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+
+          <div className="absolute inset-0 bg-gradient-radial from-purple-900/30 via-background to-background" />
+
+          <div className="absolute bottom-0 right-0 w-full h-full bg-cyan-600/10 blur-[50px] rounded-full" />
+
           <div
             className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[rgba(24,24,27,0.8)] to-[rgba(0,0,0,0)]"
             style={{ maskImage: "linear-gradient(to right, black, transparent)" }}
