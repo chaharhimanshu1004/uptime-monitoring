@@ -6,12 +6,18 @@ import { FloatingElements } from "./floating-elements"
 import { TrustStats } from "./trust-stats"
 import { FeatureHighlights } from "./feature-highlights"
 import { Navbar } from "./navbar"
+import { useSession } from "next-auth/react"
 
 const GetStarted = () => {
-  const router = useRouter()
+  const router = useRouter();
+  const { data: session } = useSession();
 
   const handleGetStarted = () => {
-    router.push("onboarding/sign-up")
+    if(session){
+      router.push("/dashboard");
+    }else{
+      router.push("/onboarding/sign-up");
+    }
   }
 
   return (
