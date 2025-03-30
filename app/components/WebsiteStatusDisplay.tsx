@@ -70,27 +70,34 @@ export function WebsiteStatusDisplay() {
   const handlePauseMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
     e.stopPropagation()
     try {
-      setWebsites((prev) => prev.map((site) => (site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site)))
 
       await axios.post(`/api/user/toggle-monitor`, {
         websiteId,
         action: websites.find((w) => w.id === websiteId)?.isPaused ? "resume" : "pause",
       })
 
-      // toast({
-      //   title: websites.find(w => w.id === websiteId)?.isPaused
-      //     ? "Monitor resumed"
-      //     : "Monitor paused",
-      //   description: "Your monitor status has been updated successfully.",
-      // })
+      setWebsites((prev) => prev.map((site) => (site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site)))
+      toast.success('Monitor successfully paused',
+        {
+          style: {
+            borderRadius: '4px',
+            background: 'rgb(50, 140, 90)',
+            color: '#fff',
+          }
+        }
+      );
     } catch (error) {
       console.error("Error toggling monitor:", error)
       setWebsites((prev) => prev.map((site) => (site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site)))
-      // toast({
-      //   title: "Action failed",
-      //   description: "There was a problem updating your monitor status.",
-      //   variant: "destructive",
-      // })
+      toast.error('Error, Please try again after sometime !',
+        {
+          style: {
+            borderRadius: '4px',
+            background: 'rgb(170, 50, 60)',
+            color: '#fff',
+          }
+        }
+      );
     }
   }
 
