@@ -1,14 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useSession } from "next-auth/react"
 import type { User } from "next-auth"
 import axios from "axios"
-import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge } from "lucide-react"
+import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+// import { toast } from "@/components/ui/use-toast"
 
 interface Website {
   id: string | number
@@ -16,6 +24,7 @@ interface Website {
   userId: string | number
   updatedAt: Date
   createdAt: Date
+  isPaused?: boolean
 }
 
 export function WebsiteStatusDisplay() {
@@ -52,9 +61,68 @@ export function WebsiteStatusDisplay() {
     router.push(`/monitor/${id}`)
   }
 
+  const handlePauseMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
+    e.stopPropagation()
+    try {
+      setWebsites(prev => 
+        prev.map(site => 
+          site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site
+        )
+      )
+      
+      await axios.post(`/api/user/toggle-monitor`, { 
+        websiteId, 
+        action: websites.find(w => w.id === websiteId)?.isPaused ? 'resume' : 'pause' 
+      })
+      
+      // toast({
+      //   title: websites.find(w => w.id === websiteId)?.isPaused 
+      //     ? "Monitor resumed" 
+      //     : "Monitor paused",
+      //   description: "Your monitor status has been updated successfully.",
+      // })
+    } catch (error) {
+      console.error("Error toggling monitor:", error)
+      setWebsites(prev => 
+        prev.map(site => 
+          site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site
+        )
+      )
+      // toast({
+      //   title: "Action failed",
+      //   description: "There was a problem updating your monitor status.",
+      //   variant: "destructive",
+      // })
+    }
+  }
+
+  const handleDeleteMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
+    e.stopPropagation()
+    if (confirm("Are you sure you want to delete this monitor? This action cannot be undone.")) {
+      try {
+        
+        
+        await axios.delete(`/api/user/delete-website?websiteId=${websiteId}`);
+        setWebsites(prev => prev.filter(site => site.id !== websiteId))
+        
+        // toast({
+        //   title: "Monitor deleted",
+        //   description: "Your monitor has been deleted successfully.",
+        // })
+      } catch (error) {
+        console.error("Error deleting monitor for websiteId:" , websiteId, error);
+        
+        // toast({
+        //   title: "Deletion failed",
+        //   description: "There was a problem deleting your monitor.",
+        //   variant: "destructive",
+        // })
+      }
+    }
+  }
+
   const firstName = user?.name?.split(" ")[0] || "User"
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -71,7 +139,7 @@ export function WebsiteStatusDisplay() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#0A0A0B] text-white p-6">
+    <div className="h-full flex flex-col bg-[#0A0A0B] text-white p-16">
       <div className="flex items-center justify-between mb-8">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -177,23 +245,35 @@ export function WebsiteStatusDisplay() {
                 key={index}
                 variants={itemVariants}
                 onClick={() => handleWebsiteClick(website.id)}
-                className="flex items-center justify-between p-4 hover:bg-white/5 transition-all duration-200 group hover:cursor-pointer"
+                className="flex items-center justify-between p-5 hover:bg-white/5 transition-all duration-200 group hover:cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className="relative flex items-center justify-center w-3 h-3">
-                    <span className="absolute inline-flex w-full h-full duration-1000 bg-green-400 rounded-full opacity-75 animate-ping"></span>
-                    <span className="relative inline-flex w-2 h-2 bg-green-500 rounded-full"></span>
+                    {!website.isPaused ? (
+                      <>
+                        <span className="absolute inline-flex w-full h-full duration-1000 bg-green-400 rounded-full opacity-75 animate-ping"></span>
+                        <span className="relative inline-flex w-2 h-2 bg-green-500 rounded-full"></span>
+                      </>
+                    ) : (
+                      <span className="relative inline-flex w-2 h-2 bg-yellow-500 rounded-full"></span>
+                    )}
                   </div>
                   <div>
                     <div className="font-medium text-gray-100 group-hover:text-white transition-colors">
                       {website.url.replace(/(^\w+:|^)\/\//, "")}
                     </div>
-                    <div className="text-sm text-emerald-400 flex items-center">Up • 14m</div>
+                    <div className="text-sm flex items-center">
+                      {website.isPaused ? (
+                        <span className="text-yellow-400">Paused</span>
+                      ) : (
+                        <span className="text-emerald-400">Up • 14m</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-gray-500">3m</span>
-                  <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -205,13 +285,66 @@ export function WebsiteStatusDisplay() {
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-gray-400 hover:text-white hover:bg-white/5 rounded-lg"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-gray-400 hover:text-white hover:bg-white/5 rounded-lg"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent 
+                        align="end" 
+                        className="w-48 bg-zinc-900 border border-zinc-800 text-white"
+                      >
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
+                          onClick={(e) => handlePauseMonitor(e, website.id)}
+                        >
+                          {website.isPaused ? (
+                            <>
+                              <Play className="h-4 w-4 text-emerald-400" />
+                              <span>Resume Monitor</span>
+                            </>
+                          ) : (
+                            <>
+                              <Pause className="h-4 w-4 text-yellow-400" />
+                              <span>Pause Monitor</span>
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
+                          onClick={(e) => router.push(`/monitor/${website.id}/settings`)}
+                        >
+                          <Settings className="h-4 w-4 text-blue-400" />
+                          <span>Monitor Settings</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
+                          onClick={(e) => router.push(`/monitor/${website.id}/alerts`)}
+                        >
+                          <AlertCircle className="h-4 w-4 text-purple-400" />
+                          <span>Configure Alerts</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator className="bg-zinc-800" />
+                        
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2 focus:bg-white/5 focus:text-white text-red-400 cursor-pointer"
+                          onClick={(e) => handleDeleteMonitor(e, website.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span>Delete Monitor</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </motion.div>
@@ -222,4 +355,3 @@ export function WebsiteStatusDisplay() {
     </div>
   )
 }
-
