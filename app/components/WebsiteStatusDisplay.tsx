@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import type React from "react"
+
+import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import type { User } from "next-auth"
 import axios from "axios"
-import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings } from 'lucide-react'
+import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
@@ -16,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal"
 // import { toast } from "@/components/ui/use-toast"
 
 interface Website {
@@ -33,6 +36,9 @@ export function WebsiteStatusDisplay() {
   const user = session?.user as User
   const [websites, setWebsites] = useState<Website[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [websiteToDelete, setWebsiteToDelete] = useState<Website | null>(null)
+
   let userId: string | number | undefined = user?.id
 
   if (userId) {
@@ -64,30 +70,22 @@ export function WebsiteStatusDisplay() {
   const handlePauseMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
     e.stopPropagation()
     try {
-      setWebsites(prev => 
-        prev.map(site => 
-          site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site
-        )
-      )
-      
-      await axios.post(`/api/user/toggle-monitor`, { 
-        websiteId, 
-        action: websites.find(w => w.id === websiteId)?.isPaused ? 'resume' : 'pause' 
+      setWebsites((prev) => prev.map((site) => (site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site)))
+
+      await axios.post(`/api/user/toggle-monitor`, {
+        websiteId,
+        action: websites.find((w) => w.id === websiteId)?.isPaused ? "resume" : "pause",
       })
-      
+
       // toast({
-      //   title: websites.find(w => w.id === websiteId)?.isPaused 
-      //     ? "Monitor resumed" 
+      //   title: websites.find(w => w.id === websiteId)?.isPaused
+      //     ? "Monitor resumed"
       //     : "Monitor paused",
       //   description: "Your monitor status has been updated successfully.",
       // })
     } catch (error) {
       console.error("Error toggling monitor:", error)
-      setWebsites(prev => 
-        prev.map(site => 
-          site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site
-        )
-      )
+      setWebsites((prev) => prev.map((site) => (site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site)))
       // toast({
       //   title: "Action failed",
       //   description: "There was a problem updating your monitor status.",
@@ -96,28 +94,38 @@ export function WebsiteStatusDisplay() {
     }
   }
 
-  const handleDeleteMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
+  const openDeleteModal = (e: React.MouseEvent, website: Website) => {
     e.stopPropagation()
-    if (confirm("Are you sure you want to delete this monitor? This action cannot be undone.")) {
-      try {
-        
-        
-        await axios.delete(`/api/user/delete-website?websiteId=${websiteId}`);
-        setWebsites(prev => prev.filter(site => site.id !== websiteId))
-        
-        // toast({
-        //   title: "Monitor deleted",
-        //   description: "Your monitor has been deleted successfully.",
-        // })
-      } catch (error) {
-        console.error("Error deleting monitor for websiteId:" , websiteId, error);
-        
-        // toast({
-        //   title: "Deletion failed",
-        //   description: "There was a problem deleting your monitor.",
-        //   variant: "destructive",
-        // })
-      }
+    setWebsiteToDelete(website)
+    setDeleteModalOpen(true)
+  }
+
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false)
+    setTimeout(() => setWebsiteToDelete(null), 300) // Clear after animation completes
+  }
+
+  const confirmDelete = async () => {
+    if (!websiteToDelete) return
+
+    try {
+      await axios.delete(`/api/user/delete-website?websiteId=${websiteToDelete.id}`)
+      setWebsites((prev) => prev.filter((site) => site.id !== websiteToDelete.id))
+
+      // toast({
+      //   title: "Monitor deleted",
+      //   description: "Your monitor has been deleted successfully.",
+      // })
+    } catch (error) {
+      console.error("Error deleting monitor for websiteId:", websiteToDelete.id, error)
+
+      // toast({
+      //   title: "Deletion failed",
+      //   description: "There was a problem deleting your monitor.",
+      //   variant: "destructive",
+      // })
+    } finally {
+      closeDeleteModal()
     }
   }
 
@@ -140,6 +148,16 @@ export function WebsiteStatusDisplay() {
 
   return (
     <div className="h-full flex flex-col bg-[#0A0A0B] text-white p-16">
+      {/* Delete Confirmation Modal */}
+      {websiteToDelete && (
+        <DeleteConfirmationModal
+          isOpen={deleteModalOpen}
+          onClose={closeDeleteModal}
+          onConfirm={confirmDelete}
+          websiteUrl={websiteToDelete.url.replace(/(^\w+:|^)\/\//, "")}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-8">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -285,7 +303,7 @@ export function WebsiteStatusDisplay() {
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
-                    
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -297,11 +315,8 @@ export function WebsiteStatusDisplay() {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent 
-                        align="end" 
-                        className="w-48 bg-zinc-900 border border-zinc-800 text-white"
-                      >
-                        <DropdownMenuItem 
+                      <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border border-zinc-800 text-white">
+                        <DropdownMenuItem
                           className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
                           onClick={(e) => handlePauseMonitor(e, website.id)}
                         >
@@ -317,28 +332,28 @@ export function WebsiteStatusDisplay() {
                             </>
                           )}
                         </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
+
+                        <DropdownMenuItem
                           className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
                           onClick={(e) => router.push(`/monitor/${website.id}/settings`)}
                         >
                           <Settings className="h-4 w-4 text-blue-400" />
                           <span>Monitor Settings</span>
                         </DropdownMenuItem>
-                        
-                        <DropdownMenuItem 
+
+                        <DropdownMenuItem
                           className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
                           onClick={(e) => router.push(`/monitor/${website.id}/alerts`)}
                         >
                           <AlertCircle className="h-4 w-4 text-purple-400" />
                           <span>Configure Alerts</span>
                         </DropdownMenuItem>
-                        
+
                         <DropdownMenuSeparator className="bg-zinc-800" />
-                        
-                        <DropdownMenuItem 
+
+                        <DropdownMenuItem
                           className="flex items-center gap-2 focus:bg-white/5 focus:text-white text-red-400 cursor-pointer"
-                          onClick={(e) => handleDeleteMonitor(e, website.id)}
+                          onClick={(e) => openDeleteModal(e, website)}
                         >
                           <Trash2 className="h-4 w-4" />
                           <span>Delete Monitor</span>
@@ -355,3 +370,4 @@ export function WebsiteStatusDisplay() {
     </div>
   )
 }
+
