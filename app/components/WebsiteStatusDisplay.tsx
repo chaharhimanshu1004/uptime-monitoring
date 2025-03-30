@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import type { User } from "next-auth"
@@ -11,13 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal"
 import toast from "react-hot-toast"
 
@@ -70,14 +63,20 @@ export function WebsiteStatusDisplay() {
   const handlePauseMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
     e.stopPropagation()
     try {
+      const currentIsPaused = websites.find((w) => w.id === websiteId)?.isPaused || false;
 
-      await axios.post(`/api/user/toggle-monitor`, {
+      setWebsites((prev) => prev.map((site) => 
+        site.id === websiteId ? { ...site, isPaused: !currentIsPaused } : site
+      ))
+
+      const response = await axios.post(`/api/user/toggle-monitor`, {
         websiteId,
         action: websites.find((w) => w.id === websiteId)?.isPaused ? "resume" : "pause",
       })
 
-      setWebsites((prev) => prev.map((site) => (site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site)))
-      toast.success('Monitor successfully paused',
+
+      toast.success(
+        currentIsPaused ? 'Monitor resumed' : 'Monitor paused',
         {
           style: {
             borderRadius: '4px',
@@ -88,8 +87,11 @@ export function WebsiteStatusDisplay() {
       );
     } catch (error) {
       console.error("Error toggling monitor:", error)
-      setWebsites((prev) => prev.map((site) => (site.id === websiteId ? { ...site, isPaused: !site.isPaused } : site)))
-      toast.error('Error, Please try again after sometime !',
+      setWebsites((prev) => prev.map((site) => 
+        site.id === websiteId ? { ...site, isPaused: websites.find((w) => w.id === websiteId)?.isPaused || false } : site
+      ))
+      
+      toast.error('Error updating monitor status!',
         {
           style: {
             borderRadius: '4px',
