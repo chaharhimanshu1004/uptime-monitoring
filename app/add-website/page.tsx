@@ -9,14 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { LoadingBar } from "../components/LoadingBar"
-import { useToast } from "@/hooks/use-toast"
+import toast from "react-hot-toast"
 
 export default function CreateMonitor() {
   const [websiteUrl, setWebsiteUrl] = useState("")
   const [alertType, setAlertType] = useState("unavailable")
   const [urlError, setUrlError] = useState("")
   const [loading,setLoading] = useState(false)
-  const { toast } = useToast()
 
   const handleSubmit = async () => {
 
@@ -49,17 +48,28 @@ export default function CreateMonitor() {
       if (!response.ok) {
         throw new Error("Failed to add website")
       }
-      toast({
-        title: "Website added successfully!!",
-      })
+      toast.success('Website added successfully !',
+        {
+          style: {
+            borderRadius: '4px',
+            background: 'rgb(50, 140, 90)',
+            color: '#fff',
+          }
+        }
+      );
       
     } catch (error) {
       console.error("Error adding website:", error)
-      toast({
-        title: "Failed to add the website",
-        description: "Please try again later!",
-        variant:"destructive"
-      })
+      toast.error('Error, Please try again after sometime !',
+        {
+          style: {
+            borderRadius: '4px',
+            background: 'rgb(170, 50, 60)',
+            color: '#fff',
+          }
+        }
+      );
+      
     }finally{
       setLoading(false)
     }

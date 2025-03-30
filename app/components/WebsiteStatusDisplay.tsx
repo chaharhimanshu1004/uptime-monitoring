@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import type { User } from "next-auth"
 import axios from "axios"
-import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings} from "lucide-react"
+import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal"
-// import { toast } from "@/components/ui/use-toast"
+import toast from "react-hot-toast"
 
 interface Website {
   id: string | number
@@ -112,18 +112,27 @@ export function WebsiteStatusDisplay() {
       await axios.delete(`/api/user/delete-website?websiteId=${websiteToDelete.id}`)
       setWebsites((prev) => prev.filter((site) => site.id !== websiteToDelete.id))
 
-      // toast({
-      //   title: "Monitor deleted",
-      //   description: "Your monitor has been deleted successfully.",
-      // })
+      toast.success('Monitor successfully deleted',
+        {
+          style: {
+            borderRadius: '4px',
+            background: 'rgb(50, 140, 90)',
+            color: '#fff',
+          }
+        }
+      );
     } catch (error) {
       console.error("Error deleting monitor for websiteId:", websiteToDelete.id, error)
 
-      // toast({
-      //   title: "Deletion failed",
-      //   description: "There was a problem deleting your monitor.",
-      //   variant: "destructive",
-      // })
+      toast.error('Error, Please try again after sometime !',
+        {
+          style: {
+            borderRadius: '4px',
+            background: 'rgb(170, 50, 60)',
+            color: '#fff',
+          }
+        }
+      );
     } finally {
       closeDeleteModal()
     }
@@ -148,7 +157,6 @@ export function WebsiteStatusDisplay() {
 
   return (
     <div className="h-full flex flex-col bg-[#0A0A0B] text-white p-16">
-      {/* Delete Confirmation Modal */}
       {websiteToDelete && (
         <DeleteConfirmationModal
           isOpen={deleteModalOpen}

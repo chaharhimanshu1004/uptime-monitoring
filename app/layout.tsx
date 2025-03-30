@@ -1,6 +1,7 @@
 import "./globals.css";
 import AuthProvider from "./context/AuthProvider";
-import { Toaster } from "@/components/ui/toaster"
+// import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
   children,
