@@ -201,7 +201,7 @@ export default function CreateMonitor() {
               <div className="pt-4">
                 <Button
                   onClick={handleSubmit}
-                  className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 transition-opacity"
+                  className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white hover:opacity-90 transition-opacity"
                 >
                   Create Monitor
                 </Button>

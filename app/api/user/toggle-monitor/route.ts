@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authoptions } from "../../auth/[...nextauth]/options";
 import prisma from "@/lib/prisma";
 import { User } from "next-auth";
+import { pauseWebsiteMonitoring, resumeWebsiteMonitoring } from "@/lib/queue";
 
 export async function POST(request: Request) {
     const session = await getServerSession(authoptions);
@@ -65,6 +66,13 @@ export async function POST(request: Request) {
                 updatedAt: new Date()
             }
         });
+
+        // if paused : remove from redis else add in redis 
+        if (action === "pause") {
+            await pauseWebsiteMonitoring(websiteId);
+        } else {
+            await resumeWebsiteMonitoring(websiteId);
+        }
 
         return Response.json({ 
             success: true, 
