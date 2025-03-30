@@ -25,6 +25,21 @@ export async function POST(request:Request){
         if (isNaN(dbUserId)) {
             return Response.json({ success: false, message: "Invalid user ID" }, { status: 400 });
         }
+        const existingWebsite = await prisma.website.findFirst({
+            where: {
+                url: url,
+                userId: dbUserId
+            }
+        });
+        
+        if (existingWebsite) {
+            return Response.json({ 
+                success: false, 
+                message: "You are already monitoring this website",
+                website: existingWebsite,
+                code: "DUPLICATE_WEBSITE"
+            }, { status: 409 });
+        }
         const website = await prisma.website.create({
             data: {
                 url,

@@ -45,8 +45,21 @@ export default function CreateMonitor() {
         body: JSON.stringify({ url: `https://${normalizedUrl}` }),
       })
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to add website")
+        if (data.code === "DUPLICATE_WEBSITE") {
+          toast.error('You are already monitoring this website', {
+            style: {
+              borderRadius: '4px',
+              background: 'rgb(170, 50, 60)',
+              color: '#fff',
+            }
+          });
+        } else {
+          throw new Error("Failed to add website")
+        }
+        return;
       }
       toast.success('Website added successfully !',
         {
@@ -74,15 +87,15 @@ export default function CreateMonitor() {
       setLoading(false)
     }
   }
+  
 
   return (
     <div className="min-h-screen bg-black">
       <LoadingBar isLoading={loading} />
-      {/* Breadcrumb Navigation */}
       <div className="border-b border-zinc-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4 flex items-center space-x-2 text-md font-semibold">
-            <Link href="/monitors" className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors">
+            <Link href="/dashboard" className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors">
               <Globe className="w-4 h-4" />
               Monitors
             </Link>
@@ -162,7 +175,7 @@ export default function CreateMonitor() {
                       setUrlError("");
                     }}
                     
-                    className="w-full bg-black/50 border-zinc-800 pl-20 text-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-purple-500/50"
+                    className="w-full  bg-black/50 border-zinc-800 pl-[83px] text-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-purple-500/50"
                     placeholder=" example.com"
                   />
                   <div className="absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none border-r border-zinc-800">
