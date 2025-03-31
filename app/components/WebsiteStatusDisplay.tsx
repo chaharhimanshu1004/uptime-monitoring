@@ -69,7 +69,7 @@ export function WebsiteStatusDisplay() {
         site.id === websiteId ? { ...site, isPaused: !currentIsPaused } : site
       ))
 
-      const response = await axios.post(`/api/user/toggle-monitor`, {
+      await axios.post(`/api/user/toggle-monitor`, {
         websiteId,
         action: websites.find((w) => w.id === websiteId)?.isPaused ? "resume" : "pause",
       })
