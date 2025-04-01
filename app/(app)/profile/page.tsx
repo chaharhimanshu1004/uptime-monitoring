@@ -6,16 +6,26 @@ import { AppSidebar } from "@/components/Sidebar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { motion } from "framer-motion"
 import axios from "axios"
-import { Gauge, CheckCircle, AlertCircle } from "lucide-react"
+import { CheckCircle, AlertCircle, Mail } from "lucide-react"
 import type { User } from "next-auth"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Separator } from "@/components/ui/separator"
+
+interface Website {
+  id: string | number
+  url: string
+  userId: string | number
+  updatedAt: Date
+  createdAt: Date
+  isPaused?: boolean
+}
 
 const ProfileDashboard = () => {
   const { data: session } = useSession()
-  const [websites, setWebsites] = useState([])
-  const [isLoading, setIsLoading] = useState(true);
+  const [websites, setWebsites] = useState<Website[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const user: User = session?.user as User
-  
 
   useEffect(() => {
     const fetchWebsites = async () => {
@@ -30,80 +40,104 @@ const ProfileDashboard = () => {
       }
     }
     if (session?.user?.id) fetchWebsites()
-  }, [session])
+  }, [session, user?.id])
+
+  // Get first name for greeting
+  const firstName = user?.name?.split(" ")[0] || "User"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0A0B] to-[#141417] text-white">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-[#0A0A0B]"
+    >
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="p-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-8"
-            >
-              <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 text-transparent bg-clip-text">
-                Profile Dashboard
-              </h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div className="bg-zinc-900/40 p-6 rounded-2xl border border-zinc-800/50 shadow-lg shadow-purple-500/20">
-                  <h2 className="text-xl font-semibold text-zinc-300">Total Websites</h2>
-                  <p className="text-4xl font-extrabold mt-2 text-white">{websites.length}</p>
-                </div>
-                <div className="bg-zinc-900/40 p-6 rounded-2xl border border-zinc-800/50 shadow-lg shadow-green-500/20">
-                  <h2 className="text-xl font-semibold text-zinc-300">Websites Up</h2>
-                  <p className="text-4xl font-extrabold mt-2 text-green-400">
-                    {websites.filter((site) => !site.isPaused).length}
-                  </p>
-                </div>
-                <div className="bg-zinc-900/40 p-6 rounded-2xl border border-zinc-800/50 shadow-lg shadow-yellow-500/20">
-                  <h2 className="text-xl font-semibold text-zinc-300">Websites Paused</h2>
-                  <p className="text-4xl font-extrabold mt-2 text-yellow-400">
-                    {websites.filter((site) => site.isPaused).length}
-                  </p>
+          <div className="h-full">
+            <div className="border-b border-zinc-800/70">
+              <div className="max-w-5xl mx-auto px-6 py-4 flex justify-center items-center">
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarImage src={user?.image || ""} />
+                  <AvatarFallback className="bg-zinc-800 text-zinc-200">{firstName.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="text-white font-medium">{user?.name}</h2>
+                  <div className="flex items-center text-sm text-zinc-400">
+                    <Mail className="h-3.5 w-3.5 mr-1.5" />
+                    {user?.email}
+                  </div>
                 </div>
               </div>
-              <div className="bg-zinc-900/40 p-8 rounded-2xl border border-zinc-800/50 shadow-lg shadow-indigo-500/20">
-                <h2 className="text-3xl font-bold text-zinc-300 mb-6">Website Status</h2>
+            </div>
+
+            <div className="max-w-5xl mx-auto p-6">
+              <h1 className="text-xl font-medium text-white mb-6">Profile Dashboard</h1>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-zinc-900/40 rounded-lg border border-zinc-800/50 p-4">
+                  <div className="text-sm text-zinc-400 mb-1">Total Websites</div>
+                  <div className="text-2xl font-semibold text-white">{websites.length}</div>
+                </div>
+                <div className="bg-zinc-900/40 rounded-lg border border-zinc-800/50 p-4">
+                  <div className="text-sm text-zinc-400 mb-1">Websites Up</div>
+                  <div className="text-2xl font-semibold text-green-400">
+                    {websites.filter((site) => !site.isPaused).length}
+                  </div>
+                </div>
+                <div className="bg-zinc-900/40 rounded-lg border border-zinc-800/50 p-4">
+                  <div className="text-sm text-zinc-400 mb-1">Websites Paused</div>
+                  <div className="text-2xl font-semibold text-yellow-400">
+                    {websites.filter((site) => site.isPaused).length}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900/40 rounded-lg border border-zinc-800/50 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800/70">
+                  <h2 className="text-lg font-medium text-white">Website Status</h2>
+                </div>
+
                 {isLoading ? (
-                  <p className="text-gray-400">Loading...</p>
+                  <div className="p-6 text-center text-zinc-400">
+                    <div className="inline-block h-4 w-4 border-2 border-current border-r-transparent rounded-full animate-spin mr-2"></div>
+                    Loading...
+                  </div>
                 ) : websites.length === 0 ? (
-                  <p className="text-gray-400">No websites added yet.</p>
+                  <div className="p-6 text-center text-zinc-400">No websites added yet.</div>
                 ) : (
-                  <div className="space-y-4">
-                    {websites.map((website) => (
-                      <div
-                        key={website.id}
-                        className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl hover:bg-zinc-700/50 transition-all duration-300"
-                      >
-                        <div>
-                          <p className="font-medium text-white">
-                            {website.url.replace(/(^\w+:|^)\/\//, "")}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            {website.isPaused ? "Paused" : "Active"}
-                          </p>
-                        </div>
-                        <div>
-                          {website.isPaused ? (
-                            <AlertCircle className="h-6 w-6 text-yellow-400" />
-                          ) : (
-                            <CheckCircle className="h-6 w-6 text-green-400" />
-                          )}
+                  <div>
+                    {websites.map((website, index) => (
+                      <div key={website.id}>
+                        {index > 0 && <Separator className="bg-zinc-800/70" />}
+                        <div className="flex items-center justify-between p-4 hover:bg-zinc-800/20 transition-colors">
+                          <div className="flex items-center">
+                            <div className="mr-3">
+                              {website.isPaused ? (
+                                <AlertCircle className="h-5 w-5 text-yellow-400" />
+                              ) : (
+                                <CheckCircle className="h-5 w-5 text-green-400" />
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-white font-medium">{website.url.replace(/(^\w+:|^)\/\//, "")}</div>
+                              <div className="text-sm text-zinc-400">{website.isPaused ? "Paused" : "Active"}</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-            </motion.div>
+            </div>
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </div>
+    </motion.div>
   )
 }
 
 export default ProfileDashboard
+
