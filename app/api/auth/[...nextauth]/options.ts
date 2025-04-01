@@ -51,6 +51,37 @@ export const authoptions: NextAuthOptions = {
         })
     ],
     callbacks: {
+        async signIn({ user, account, profile }) {
+            if (account?.provider === 'google') {
+                const existingUser = await prisma.user.findUnique({
+                    where: {
+                        email: user.email!
+                    }
+                });
+                
+                if (existingUser) {
+                    user.id = existingUser?.id.toString();
+                    return true;
+                } else {
+                    try {
+                        const newUser = await prisma.user.create({
+                            data: {
+                                email: user.email!,
+                                name: user.name!,
+                                isVerified: true, 
+                                password: await bcrypt.hash(Math.random().toString(36).slice(2) + Date.now().toString(), 10), // random password for db schema
+                            }
+                        });
+                        user.id = newUser?.id.toString();
+                        return true;
+                    } catch (error) {
+                        console.error("Error creating user from Google auth:", error);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        },
         async jwt({token, user }) { // this user is the user that we have returned from the credentials authorize function
             // we can only put id in the token which is by defauly, 
             // but we will be putting the email and name other stuffs as well so that we dont require to fetch the user from the database everytime,
@@ -74,6 +105,7 @@ export const authoptions: NextAuthOptions = {
 
             return session
         },  
+        
 
     },
     pages: {
