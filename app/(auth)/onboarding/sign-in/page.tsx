@@ -8,11 +8,13 @@ import { useRouter } from "next/navigation"
 import { Gauge } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [showGoogleReminder, setShowGoogleReminder] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +26,14 @@ export default function SignInPage() {
         password: password,
       })
       if (result?.error) {
-        setError(result.error) // add toast here
+        setError(result.error)
+        
+        if (result.error.includes("Invalid credentials") || 
+            result.error.includes("Invalid Password") || 
+            result.error.includes("No user found")) {
+          setShowGoogleReminder(true)
+        }
+        
         return
       }
       if (result?.url) {
@@ -42,6 +51,20 @@ export default function SignInPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#0A0A0B] text-white">
+      {showGoogleReminder && (
+        <Dialog open={showGoogleReminder} onOpenChange={setShowGoogleReminder}>
+          <DialogContent className="bg-[#1c1c20] border border-amber-500 text-amber-100">
+            <DialogHeader>
+              <DialogTitle>Invalid Credentials</DialogTitle>
+              <DialogDescription>
+                Having trouble signing in? If you previously used Google to sign in with this email, 
+                try the "Sign in with Google" option below instead.
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="inline-block p-3 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500">
@@ -140,4 +163,3 @@ export default function SignInPage() {
     </div>
   )
 }
-
