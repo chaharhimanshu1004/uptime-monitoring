@@ -69,7 +69,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
       <div className="border-b border-zinc-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4 flex items-center space-x-2 text-md font-semibold">
-            <Link href="/monitors" className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors">
+            <Link href="/dashboard" className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors">
               <Globe className="w-4 h-4" />
               Monitors
             </Link>
