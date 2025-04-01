@@ -1,6 +1,7 @@
 "use client"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle} from "@/components/ui/alert-dialog"
-import { Trash2 } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean
@@ -10,36 +11,57 @@ interface DeleteConfirmationModalProps {
 }
 
 export function DeleteConfirmationModal({ isOpen, onClose, onConfirm, websiteUrl }: DeleteConfirmationModalProps) {
+  if (!isOpen) return null
+
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="bg-zinc-900 border border-zinc-800 text-white">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-white">
-            <Trash2 className="h-5 w-5 text-red-400" />
-            Delete Monitor
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-zinc-400">
-            Are you sure you want to delete the monitor for{" "}
-            <span className="font-medium text-zinc-300">{websiteUrl}</span>?
-            <div className="mt-2 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800 text-sm">
-              This action cannot be undone. The monitor will be permanently removed from our servers and you will no
-              longer receive any alerts for this website.
-            </div>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700 hover:text-white">
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            onClick={onClose}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="w-full max-w-md rounded-xl bg-[#141417] border border-[#232328] p-6 shadow-xl"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+                  <AlertTriangle className="h-6 w-6 text-red-500" />
+                </div>
+                <h2 className="text-xl font-semibold text-white mb-2">Delete Monitor</h2>
+                <p className="mb-6 text-gray-400">
+                  Are you sure you want to delete the monitor for{" "}
+                  <span className="font-medium text-white">{websiteUrl}</span>? This action cannot be undone.
+                </p>
+                <div className="flex w-full gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
+                    onClick={onConfirm}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }
-
