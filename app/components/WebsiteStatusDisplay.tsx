@@ -5,13 +5,14 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import type { User } from "next-auth"
 import axios from "axios"
-import { ChevronDown, MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings } from "lucide-react"
+import { MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal"
+import { PauseConfirmationModal } from "./PauseConfirmationModal" 
 import toast from "react-hot-toast"
 
 interface Website {
@@ -31,6 +32,9 @@ export function WebsiteStatusDisplay() {
   const [isLoading, setIsLoading] = useState(true)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [websiteToDelete, setWebsiteToDelete] = useState<Website | null>(null)
+  // Add state for pause confirmation modal
+  const [pauseModalOpen, setPauseModalOpen] = useState(false)
+  const [websiteToPause, setWebsiteToPause] = useState<Website | null>(null)
 
   let userId: string | number | undefined = user?.id
 
@@ -60,47 +64,98 @@ export function WebsiteStatusDisplay() {
     router.push(`/monitor/${id}`)
   }
 
+  // Modified to open modal for pause action, but skip modal for resume action
   const handlePauseMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
     e.stopPropagation()
-    try {
-      const currentIsPaused = websites.find((w) => w.id === websiteId)?.isPaused || false;
+    
+    const website = websites.find((w) => w.id === websiteId)
+    if (!website) return
+    
+    if (website.isPaused) {
+      try {
+        setWebsites((prev) =>
+          prev.map((site) => (site.id === websiteId ? { ...site, isPaused: false } : site)),
+        )
 
-      setWebsites((prev) => prev.map((site) => 
-        site.id === websiteId ? { ...site, isPaused: !currentIsPaused } : site
-      ))
+        await axios.post(`/api/user/toggle-monitor`, {
+          websiteId,
+          action: "resume",
+        })
+
+        toast.success("Monitor resumed", {
+          style: {
+            borderRadius: "10px",
+            background: "rgba(50, 140, 90, 0.9)",
+            color: "#fff",
+            backdropFilter: "blur(10px)",
+          },
+        })
+      } catch (error) {
+        console.error("Error resuming monitor:", error)
+        setWebsites((prev) =>
+          prev.map((site) => (site.id === websiteId ? { ...site, isPaused: true } : site)),
+        )
+
+        toast.error("Error updating monitor status!", {
+          style: {
+            borderRadius: "10px",
+            background: "rgba(170, 50, 60, 0.9)",
+            color: "#fff",
+            backdropFilter: "blur(10px)",
+          },
+        })
+      }
+    } else {
+      // If not paused, show confirmation modal
+      setWebsiteToPause(website)
+      setPauseModalOpen(true)
+    }
+  }
+
+  // Function to execute after pause confirmation
+  const confirmPause = async () => {
+    if (!websiteToPause) return
+
+    try {
+      setWebsites((prev) =>
+        prev.map((site) => (site.id === websiteToPause.id ? { ...site, isPaused: true } : site)),
+      )
 
       await axios.post(`/api/user/toggle-monitor`, {
-        websiteId,
-        action: websites.find((w) => w.id === websiteId)?.isPaused ? "resume" : "pause",
+        websiteId: websiteToPause.id,
+        action: "pause",
       })
 
-
-      toast.success(
-        currentIsPaused ? 'Monitor resumed' : 'Monitor paused',
-        {
-          style: {
-            borderRadius: '4px',
-            background: 'rgb(50, 140, 90)',
-            color: '#fff',
-          }
-        }
-      );
+      toast.success("Monitor paused", {
+        style: {
+          borderRadius: "10px",
+          background: "rgba(50, 140, 90, 0.9)",
+          color: "#fff",
+          backdropFilter: "blur(10px)",
+        },
+      })
     } catch (error) {
-      console.error("Error toggling monitor:", error)
-      setWebsites((prev) => prev.map((site) => 
-        site.id === websiteId ? { ...site, isPaused: websites.find((w) => w.id === websiteId)?.isPaused || false } : site
-      ))
-      
-      toast.error('Error updating monitor status!',
-        {
-          style: {
-            borderRadius: '4px',
-            background: 'rgb(170, 50, 60)',
-            color: '#fff',
-          }
-        }
-      );
+      console.error("Error pausing monitor:", error)
+      setWebsites((prev) =>
+        prev.map((site) => (site.id === websiteToPause.id ? { ...site, isPaused: false } : site)),
+      )
+
+      toast.error("Error updating monitor status!", {
+        style: {
+          borderRadius: "10px",
+          background: "rgba(170, 50, 60, 0.9)",
+          color: "#fff",
+          backdropFilter: "blur(10px)",
+        },
+      })
+    } finally {
+      closePauseModal()
     }
+  }
+
+  const closePauseModal = () => {
+    setPauseModalOpen(false)
+    setTimeout(() => setWebsiteToPause(null), 300) // Clear after animation completes
   }
 
   const openDeleteModal = (e: React.MouseEvent, website: Website) => {
@@ -121,27 +176,25 @@ export function WebsiteStatusDisplay() {
       await axios.delete(`/api/user/delete-website?websiteId=${websiteToDelete.id}`)
       setWebsites((prev) => prev.filter((site) => site.id !== websiteToDelete.id))
 
-      toast.success('Monitor successfully deleted',
-        {
-          style: {
-            borderRadius: '4px',
-            background: 'rgb(50, 140, 90)',
-            color: '#fff',
-          }
-        }
-      );
+      toast.success("Monitor successfully deleted", {
+        style: {
+          borderRadius: "10px",
+          background: "rgba(50, 140, 90, 0.9)",
+          color: "#fff",
+          backdropFilter: "blur(10px)",
+        },
+      })
     } catch (error) {
       console.error("Error deleting monitor for websiteId:", websiteToDelete.id, error)
 
-      toast.error('Error, Please try again after sometime !',
-        {
-          style: {
-            borderRadius: '4px',
-            background: 'rgb(170, 50, 60)',
-            color: '#fff',
-          }
-        }
-      );
+      toast.error("Error, Please try again after sometime!", {
+        style: {
+          borderRadius: "10px",
+          background: "rgba(170, 50, 60, 0.9)",
+          color: "#fff",
+          backdropFilter: "blur(10px)",
+        },
+      })
     } finally {
       closeDeleteModal()
     }
@@ -164,8 +217,20 @@ export function WebsiteStatusDisplay() {
     visible: { opacity: 1, y: 0 },
   }
 
+  const statsVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.2,
+        duration: 0.5,
+      },
+    },
+  }
+
   return (
-    <div className="h-full flex flex-col bg-[#0A0A0B] text-white p-16">
+    <div className="h-full flex flex-col bg-[#0A0A0B] text-white p-6">
       {websiteToDelete && (
         <DeleteConfirmationModal
           isOpen={deleteModalOpen}
@@ -175,12 +240,22 @@ export function WebsiteStatusDisplay() {
         />
       )}
 
+      {/* Add Pause Confirmation Modal */}
+      {websiteToPause && (
+        <PauseConfirmationModal
+          isOpen={pauseModalOpen}
+          onClose={closePauseModal}
+          onConfirm={confirmPause}
+          websiteUrl={websiteToPause.url.replace(/(^\w+:|^)\/\//, "")}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-8">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent"
+          className="text-2xl font-semibold bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent"
         >
           Greetings, {firstName}
         </motion.h1>
@@ -189,13 +264,13 @@ export function WebsiteStatusDisplay() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="relative rounded-2xl"
+            className="relative rounded-xl"
           >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               type="search"
-              placeholder="Search"
-              className="w-80 bg-[#141417]/80 text-white border-0 pl-10 placeholder:text-gray-500 rounded-xl focus:bg-[#141417] transition-colors focus:ring-1 focus:ring-purple-500/50"
+              placeholder="Search monitors"
+              className="w-64 md:w-80 bg-[#141417]/80 text-white border-0 pl-10 placeholder:text-gray-500 rounded-xl focus:bg-[#141417] transition-colors focus:ring-1 focus:ring-purple-500/50"
             />
           </motion.div>
           <motion.div
@@ -204,15 +279,44 @@ export function WebsiteStatusDisplay() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <Button
-              onClick={(e) => router.push("/add-website")}
-              className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] text-white gap-2 rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:shadow-indigo-500/30 hover:translate-y-[-2px]"
+              onClick={() => router.push("/add-website")}
+              className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 hover:from-fuchsia-600 hover:to-cyan-600 text-white gap-2 rounded-xl shadow-lg shadow-fuchsia-500/20 transition-all duration-300 hover:shadow-cyan-500/20 hover:translate-y-[-2px]"
             >
               Create monitor
-              <ChevronDown className="h-4 w-4" />
+              <Plus className="h-4 w-4" />
             </Button>
           </motion.div>
         </div>
       </div>
+
+      <motion.div
+        variants={statsVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+      >
+        <div className="bg-[#141417]/80 rounded-xl border border-[#232328] backdrop-blur-sm p-6 flex flex-col">
+          <div className="text-gray-400 text-sm mb-2">Total Uptime</div>
+          <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">
+            99.9%
+          </div>
+          <div className="text-gray-400 text-xs mt-1">Last 30 days</div>
+        </div>
+        <div className="bg-[#141417]/80 rounded-xl border border-[#232328] backdrop-blur-sm p-6 flex flex-col">
+          <div className="text-gray-400 text-sm mb-2">Monitoring</div>
+          <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+            24/7
+          </div>
+          <div className="text-gray-400 text-xs mt-1">Continuous checks</div>
+        </div>
+        <div className="bg-[#141417]/80 rounded-xl border border-[#232328] backdrop-blur-sm p-6 flex flex-col">
+          <div className="text-gray-400 text-sm mb-2">Active Monitors</div>
+          <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400">
+            {websites.filter((w) => !w.isPaused).length}
+          </div>
+          <div className="text-gray-400 text-xs mt-1">Of {websites.length} total</div>
+        </div>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -223,7 +327,7 @@ export function WebsiteStatusDisplay() {
         <div className="p-4 flex items-center justify-between border-b border-[#232328]">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-white/5 rounded-lg">
-              <ChevronDown className="h-4 w-4 mr-2" />
+              <Activity className="h-4 w-4 mr-2 text-purple-400" />
               Monitors
             </Button>
           </div>
@@ -235,7 +339,7 @@ export function WebsiteStatusDisplay() {
               variant="ghost"
               size="icon"
               className="text-gray-400 hover:text-white hover:bg-white/5 rounded-lg"
-              onClick={(e) => router.push("/add-website")}
+              onClick={() => router.push("/add-website")}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -254,14 +358,14 @@ export function WebsiteStatusDisplay() {
           </div>
         ) : websites.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16">
-            <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4">
-              <Gauge className="h-8 w-8 text-gray-400" />
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 rounded-full flex items-center justify-center mb-4 border border-purple-500/20">
+              <Gauge className="h-8 w-8 text-purple-400" />
             </div>
             <p className="text-gray-400 mb-2">No monitors available</p>
             <Button
               variant="outline"
               size="sm"
-              onClick={(e) => router.push("/add-website")}
+              onClick={() => router.push("/add-website")}
               className="mt-2 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -352,7 +456,10 @@ export function WebsiteStatusDisplay() {
 
                         <DropdownMenuItem
                           className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
-                          onClick={(e) => router.push(`/monitor/${website.id}/settings`)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/monitor/${website.id}/settings`)
+                          }}
                         >
                           <Settings className="h-4 w-4 text-blue-400" />
                           <span>Monitor Settings</span>
@@ -360,7 +467,10 @@ export function WebsiteStatusDisplay() {
 
                         <DropdownMenuItem
                           className="flex items-center gap-2 focus:bg-white/5 focus:text-white cursor-pointer"
-                          onClick={(e) => router.push(`/monitor/${website.id}/alerts`)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/monitor/${website.id}/alerts`)
+                          }}
                         >
                           <AlertCircle className="h-4 w-4 text-purple-400" />
                           <span>Configure Alerts</span>
@@ -387,4 +497,3 @@ export function WebsiteStatusDisplay() {
     </div>
   )
 }
-
