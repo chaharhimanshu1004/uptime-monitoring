@@ -31,6 +31,19 @@ interface Website {
   updatedAt?: Date
   createdAt?: Date
   isPaused?: boolean
+  lastCheckedAt?: Date | string | null
+  lastDownAt?: Date | string | null
+  incidentCount?: number
+  incidents?: Incident[]
+}
+
+interface Incident {
+  id: string
+  startTime: Date | string
+  endTime?: Date | string | null
+  isResolved: boolean
+  duration?: number | null
+  responseTime: number
 }
 
 export default function WebsiteStats({ websiteId }: { websiteId: string }) {
@@ -109,6 +122,20 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   const minResponseTime = stats?.length > 0 ? Math.min(...stats.map((s) => s.responseTime)).toFixed(2) : "0"
 
   const maxResponseTime = stats?.length > 0 ? Math.max(...stats.map((s) => s.responseTime)).toFixed(2) : "0"
+
+  function formatDuration(seconds: number): string {
+    if (seconds < 60) {
+      return `${seconds} seconds`
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60)
+      const remainingSeconds = seconds % 60
+      return `${minutes}m ${remainingSeconds}s`
+    } else {
+      const hours = Math.floor(seconds / 3600)
+      const minutes = Math.floor((seconds % 3600) / 60)
+      return `${hours}h ${minutes}m`
+    }
+  }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -267,7 +294,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   )
 
   const ChartSkeleton = ({ gradientFrom }: { gradientFrom: string }) => (
-    <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 backdrop-blur-sm border-0 shadow-xl shadow-purple-500/5 overflow-hidden relative">
+    <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 backdrop-blur-sm border-0 shadow-xl shadow-purple-500/5 overflow-hidden relative mb-8">
       <div className={`absolute inset-0 bg-gradient-to-br from-${gradientFrom}-500/5 to-transparent`}></div>
       <CardHeader className="relative z-10 border-b border-zinc-800/50">
         <div className="flex items-center">
@@ -290,6 +317,33 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                 className={`absolute inset-4 rounded-full border-t-2 border-r-2 border-${gradientFrom}-600 animate-spin animation-delay-300`}
               ></div>
             </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+
+  const IncidentSkeleton = () => (
+    <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 backdrop-blur-sm border-0 shadow-xl shadow-orange-500/5 mb-8 overflow-hidden relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent"></div>
+      <CardHeader className="relative z-10 border-b border-zinc-800/50">
+        <div className="flex items-center">
+          <Skeleton className="h-2 w-2 rounded-full mr-2" />
+          <Skeleton className="h-6 w-48" />
+        </div>
+      </CardHeader>
+      <CardContent className="relative z-10 pt-6">
+        <div className="grid gap-4 md:grid-cols-3">
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+        </div>
+        <div className="mt-6">
+          <Skeleton className="h-6 w-48 mb-3" />
+          <div className="space-y-3">
+            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-24 w-full rounded-lg" />
           </div>
         </div>
       </CardContent>
@@ -609,7 +663,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
         {loading ? (
           <ChartSkeleton gradientFrom="green" />
         ) : (
-          <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 backdrop-blur-sm border-0 shadow-xl shadow-green-500/5 overflow-hidden relative">
+          <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 backdrop-blur-sm border-0 shadow-xl shadow-green-500/5 overflow-hidden relative mb-8">
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
             <CardHeader className="relative z-10 border-b border-zinc-800/50">
               <CardTitle className="text-zinc-200 flex items-center">
@@ -671,6 +725,87 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                       />
                     </AreaChart>
                   </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {loading ? (
+          <IncidentSkeleton />
+        ) : (
+          <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 backdrop-blur-sm border-0 shadow-xl shadow-orange-500/5 mb-8 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent"></div>
+            <CardHeader className="relative z-10 border-b border-zinc-800/50">
+              <CardTitle className="text-zinc-200 flex items-center">
+                <div className="mr-2 h-2 w-2 rounded-full bg-orange-400"></div>
+                Incident History
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10 pt-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
+                  <div className="text-sm text-zinc-400 mb-1">Total Incidents</div>
+                  <div className="text-2xl font-bold text-orange-400">{website?.incidentCount || 0}</div>
+                </div>
+
+                <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
+                  <div className="text-sm text-zinc-400 mb-1">Last Down</div>
+                  <div className="text-2xl font-bold text-orange-400">
+                    {website?.lastDownAt ? new Date(website.lastDownAt).toLocaleString() : "Never"}
+                  </div>
+                </div>
+
+                <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
+                  <div className="text-sm text-zinc-400 mb-1">Last Checked</div>
+                  <div className="text-2xl font-bold text-blue-400">
+                    {website?.lastCheckedAt ? new Date(website.lastCheckedAt).toLocaleString() : "Never"}
+                  </div>
+                </div>
+              </div>
+
+              {website?.incidents && website.incidents.length > 0 ? (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium text-zinc-300 mb-3">Recent Incidents</h3>
+                  <div className="space-y-3">
+                    {website.incidents.slice(0, 5).map((incident) => (
+                      <div key={incident.id} className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center">
+                              <span
+                                className={`h-2 w-2 rounded-full ${incident.isResolved ? "bg-green-500" : "bg-red-500"} mr-2`}
+                              ></span>
+                              <span className="text-zinc-300 font-medium">
+                                {incident.isResolved ? "Resolved" : "Ongoing"}
+                              </span>
+                            </div>
+                            <div className="text-sm text-zinc-400 mt-1">
+                              Started: {new Date(incident.startTime).toLocaleString()}
+                            </div>
+                            {incident.endTime && (
+                              <div className="text-sm text-zinc-400">
+                                Ended: {new Date(incident.endTime).toLocaleString()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            {incident.duration ? (
+                              <div className="text-orange-400 font-medium">{formatDuration(incident.duration)}</div>
+                            ) : (
+                              <div className="text-red-400 font-medium">Ongoing</div>
+                            )}
+                            <div className="text-sm text-zinc-400 mt-1">Response: {incident.responseTime}ms</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-6 text-center py-8 text-zinc-500">
+                  <Shield className="h-12 w-12 text-zinc-700 mx-auto mb-3" />
+                  <p>No incidents recorded</p>
                 </div>
               )}
             </CardContent>
