@@ -159,6 +159,25 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
     }
     return null
   }
+  
+  function formatRelativeTime(timestamp: string | number | Date): string {
+    const now = new Date();
+    const lastChecked = new Date(timestamp);
+    const diffInSeconds = Math.floor((now.getTime() - lastChecked.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds} seconds ago`;
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+  }
 
   const handleToggleMonitor = async () => {
     if (!website) return
@@ -754,12 +773,12 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                   <div className="text-2xl font-bold text-orange-400">
                     {website?.lastDownAt ? new Date(website.lastDownAt).toLocaleString() : "Never"}
                   </div>
-                </div>
+              </div>
 
                 <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
                   <div className="text-sm text-zinc-400 mb-1">Last Checked</div>
                   <div className="text-2xl font-bold text-blue-400">
-                    {website?.lastCheckedAt ? new Date(website.lastCheckedAt).toLocaleString() : "Never"}
+                    {website?.lastCheckedAt ? formatRelativeTime(website.lastCheckedAt) : "Never"}
                   </div>
                 </div>
               </div>
