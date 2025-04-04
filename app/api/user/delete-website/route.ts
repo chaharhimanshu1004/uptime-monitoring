@@ -46,13 +46,7 @@ export async function DELETE(request: Request) {
             )
         }
 
-        await unregisterWebsite(websiteId); // removing website from redis
-
-        await prisma.websiteStatus.deleteMany({
-            where: {
-                websiteId: websiteId,
-            },
-        })
+        await unregisterWebsite(websiteId); 
 
         await prisma.website.delete({
             where: {
