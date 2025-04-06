@@ -18,10 +18,25 @@ import toast from "react-hot-toast"
 interface Website {
   id: string | number
   url: string
-  userId: string | number
-  updatedAt: Date
-  createdAt: Date
+  userId?: string | number
+  updatedAt?: Date
+  createdAt?: Date
   isPaused?: boolean
+  isUp?: boolean
+  lastCheckedAt?: Date | string | null
+  lastDownAt?: Date | string | null
+  lastUpAt?: Date | string | null 
+  incidentCount?: number
+  incidents?: Incident[]
+}
+
+interface Incident {
+  id: string
+  startTime: Date | string
+  endTime?: Date | string | null
+  isResolved: boolean
+  duration?: number | null
+  responseTime: number
 }
 
 export function WebsiteStatusDisplay() {
@@ -64,7 +79,6 @@ export function WebsiteStatusDisplay() {
     router.push(`/monitor/${id}`)
   }
 
-  // Modified to open modal for pause action, but skip modal for resume action
   const handlePauseMonitor = async (e: React.MouseEvent, websiteId: string | number) => {
     e.stopPropagation()
     
@@ -106,13 +120,32 @@ export function WebsiteStatusDisplay() {
         })
       }
     } else {
-      // If not paused, show confirmation modal
       setWebsiteToPause(website)
       setPauseModalOpen(true)
     }
   }
 
-  // Function to execute after pause confirmation
+  function formatUptimeDuration(timestamp: Date | string | null | undefined): string {
+    if (!timestamp) return "Unknown";
+    
+    const now = new Date();
+    const timePoint = new Date(timestamp);
+    const diffInSeconds = Math.floor((now.getTime() - timePoint.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds}s`;
+    } else if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)}m`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      const minutes = Math.floor((diffInSeconds % 3600) / 60);
+      return `${hours}h ${minutes}m`;
+    } else {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days}d`;
+    }
+  }
+
   const confirmPause = async () => {
     if (!websiteToPause) return
 
@@ -155,7 +188,7 @@ export function WebsiteStatusDisplay() {
 
   const closePauseModal = () => {
     setPauseModalOpen(false)
-    setTimeout(() => setWebsiteToPause(null), 300) // Clear after animation completes
+    setTimeout(() => setWebsiteToPause(null), 300) 
   }
 
   const openDeleteModal = (e: React.MouseEvent, website: Website) => {
@@ -166,7 +199,7 @@ export function WebsiteStatusDisplay() {
 
   const closeDeleteModal = () => {
     setDeleteModalOpen(false)
-    setTimeout(() => setWebsiteToDelete(null), 300) // Clear after animation completes
+    setTimeout(() => setWebsiteToDelete(null), 300) 
   }
 
   const confirmDelete = async () => {
@@ -390,8 +423,14 @@ export function WebsiteStatusDisplay() {
                   <div className="relative flex items-center justify-center w-3 h-3">
                     {!website.isPaused ? (
                       <>
-                        <span className="absolute inline-flex w-full h-full duration-1000 bg-green-400 rounded-full opacity-75 animate-ping"></span>
-                        <span className="relative inline-flex w-2 h-2 bg-green-500 rounded-full"></span>
+                        <span
+                          className={`absolute inline-flex w-full h-full duration-1000 rounded-full opacity-75 animate-ping ${website.isUp ? 'bg-green-400' : 'bg-red-400'
+                            }`}
+                        ></span>
+                        <span
+                          className={`relative inline-flex w-2 h-2 rounded-full ${website.isUp ? 'bg-green-500' : 'bg-red-500'
+                            }`}
+                        ></span>
                       </>
                     ) : (
                       <span className="relative inline-flex w-2 h-2 bg-yellow-500 rounded-full"></span>
@@ -404,8 +443,10 @@ export function WebsiteStatusDisplay() {
                     <div className="text-sm flex items-center">
                       {website.isPaused ? (
                         <span className="text-yellow-400">Paused</span>
+                      ) : website.isUp ? (
+                        <span className="text-emerald-400">Up • {formatUptimeDuration(website.lastUpAt)}</span>
                       ) : (
-                        <span className="text-emerald-400">Up • 14m</span>
+                        <span className="text-red-400">Down • {formatUptimeDuration(website.lastDownAt)}</span>
                       )}
                     </div>
                   </div>
