@@ -300,20 +300,39 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   }
 
   const handleSendTestAlert = async () => {
-    if (!website) return
+    if (!website) return;
+    if (!user) return;
 
     setSendingTestAlert(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      toast.success("Test alert sent successfully", {
+      const userEmail = user?.email;
+      const websiteUrl = website?.url;
+
+      const response = await axios.post("/api/user/send-alert", {
+        websiteUrl,
+        userEmail,
+      });
+
+      if (response.data.success) {
+        return toast.success("Test alert sent successfully", {
+          style: {
+            borderRadius: "10px",
+            background: "rgba(50, 140, 90, 0.9)",
+            color: "#fff",
+            backdropFilter: "blur(10px)",
+          },
+        });
+      } 
+      return toast.error("Failed to send test alert", {
         style: {
           borderRadius: "10px",
-          background: "rgba(50, 140, 90, 0.9)",
+          background: "rgba(170, 50, 60, 0.9)",
           color: "#fff",
           backdropFilter: "blur(10px)",
         },
-      })
+      });
+      
     } catch (error) {
       console.error("Error sending test alert:", error)
 
