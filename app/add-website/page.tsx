@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { LoadingBar } from "../components/LoadingBar"
 import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 export default function CreateMonitor() {
   const [websiteUrl, setWebsiteUrl] = useState("")
   const [alertType, setAlertType] = useState("unavailable")
   const [urlError, setUrlError] = useState("")
   const [loading,setLoading] = useState(false)
+  const router = useRouter();
 
   const handleSubmit = async () => {
 
@@ -70,6 +72,8 @@ export default function CreateMonitor() {
           }
         }
       );
+
+      router.push("/dashboard")
       
     } catch (error) {
       console.error("Error adding website:", error)
@@ -105,7 +109,6 @@ export default function CreateMonitor() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -125,14 +128,12 @@ export default function CreateMonitor() {
 
           <div className="bg-zinc-900/30 backdrop-blur-sm rounded-xl border border-zinc-800/50 overflow-hidden">
             <div className="p-6 space-y-6">
-              {/* Alert Type Selection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <label className="text-md text-zinc-400">Alert us when</label>
                     <Info className="w-4 h-4 text-zinc-500" />
                   </div>
-                  {/* <Badge className="bg-zinc-800 text-zinc-400 hover:bg-zinc-800">Billable</Badge> */}
                 </div>
                 <Select value={alertType} onValueChange={setAlertType}>
                   <SelectTrigger className="w-full bg-black/50 border-zinc-800 text-white focus:ring-0 focus:ring-offset-0">
@@ -159,7 +160,6 @@ export default function CreateMonitor() {
                 </p>
               </div>
 
-              {/* URL Input */}
               <div className="space-y-2 ">
                 <div className="flex items-center gap-2">
                   <label className="text-md text-zinc-400">URL to monitor</label>
@@ -197,7 +197,6 @@ export default function CreateMonitor() {
                 </p>
               </div>
 
-              {/* Submit Button */}
               <div className="pt-4">
                 <Button
                   onClick={handleSubmit}
