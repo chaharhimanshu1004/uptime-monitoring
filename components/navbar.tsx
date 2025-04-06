@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 const navItems = [
   {
@@ -38,6 +40,25 @@ const navItems = [
 ]
 
 export function Navbar() {
+
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleSignin = (e: React.FormEvent) => {
+    if (session) {
+      router.push("/dashboard");
+    } else {
+      router.push("/onboarding/sign-in");
+    }
+  }
+  const handleSignup = (e: React.FormEvent) => {
+    if (session) {
+      router.push("/dashboard");
+    } else {
+      router.push("/onboarding/sign-up");
+    }
+  }
+  
   return (
     <motion.nav
       initial={{ y: -20, opacity: 0 }}
@@ -92,15 +113,18 @@ export function Navbar() {
               </div>
 
               <div className="hidden md:flex items-center space-x-4">
-                <Link href="/onboarding/sign-in" className="text-sm text-zinc-400 hover:text-white transition-colors">
+                <button
+                  onClick={handleSignin}
+                  className="text-sm text-zinc-400 hover:text-white transition-colors"
+                >
                   Sign in
-                </Link>
-                <Link
-                  href="/onboarding/sign-up"
+                </button>
+                <button
+                  onClick={handleSignup}
                   className="inline-flex items-center justify-center h-8 px-4 text-sm font-medium text-white transition-colors bg-gradient-to-r from-fuchsia-500 to-cyan-500 rounded-lg hover:opacity-90"
                 >
                   Sign up
-                </Link>
+                </button>
               </div>
 
               <div
