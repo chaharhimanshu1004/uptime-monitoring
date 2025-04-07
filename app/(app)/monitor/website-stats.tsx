@@ -633,7 +633,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
 
         
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
           {loading ? (
             Array(2)
               .fill(0)
@@ -643,7 +643,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                     <div className="h-2 w-2 bg-zinc-800 rounded-full mr-2"></div>
                     <div className="h-5 w-48 bg-zinc-800 rounded"></div>
                   </div>
-                  <div className="h-[250px] bg-zinc-800/30 rounded"></div>
+                  <div className="h-[400px] bg-zinc-800/30 rounded"></div>
                 </div>
               ))
           ) : (
@@ -654,14 +654,14 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                   <h2 className="text-sm font-medium text-zinc-300">Response Time History</h2>
                 </div>
                 {stats.length === 0 ? (
-                  <div className="h-[250px] flex items-center justify-center text-zinc-500">
+                  <div className="h-[400px] flex items-center justify-center text-zinc-500">
                     <div className="text-center">
                       <Shield className="h-10 w-10 text-zinc-700 mx-auto mb-2" />
                       <p className="text-sm">No data available for the selected period</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="h-[250px]">
+                  <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
@@ -709,14 +709,14 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                   <h2 className="text-sm font-medium text-zinc-300">Status History</h2>
                 </div>
                 {stats.length === 0 ? (
-                  <div className="h-[250px] flex items-center justify-center text-zinc-500">
+                  <div className="h-[400px] flex items-center justify-center text-zinc-500">
                     <div className="text-center">
                       <Shield className="h-10 w-10 text-zinc-700 mx-auto mb-2" />
                       <p className="text-sm">No data available for the selected period</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="h-[250px]">
+                  <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
@@ -768,73 +768,6 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
           )}
         </div>
 
-        {loading ? (
-          <div className="bg-[#111113] rounded-lg p-4 animate-pulse">
-            <div className="flex items-center mb-3">
-              <div className="h-2 w-2 bg-zinc-800 rounded-full mr-2"></div>
-              <div className="h-5 w-48 bg-zinc-800 rounded"></div>
-            </div>
-            <div className="space-y-3">
-              {Array(3)
-                .fill(0)
-                .map((_, i) => (
-                  <div key={i} className="h-20 bg-zinc-800/30 rounded"></div>
-                ))}
-            </div>
-          </div>
-        ) : incidents && incidents.length > 0 ? (
-          <div className="bg-[#111113] rounded-lg p-4 border border-zinc-800/50">
-            <div className="flex items-center mb-3">
-              <div className="h-2 w-2 rounded-full bg-orange-400 mr-2"></div>
-              <h2 className="text-sm font-medium text-zinc-300">Recent Incidents</h2>
-            </div>
-            <div className="space-y-3">
-              {incidents.slice(0, 5).map((incident) => (
-                <div key={incident.id} className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center">
-                        <span
-                          className={`h-2 w-2 rounded-full ${incident.isResolved ? "bg-green-500" : "bg-red-500"} mr-2`}
-                        ></span>
-                        <span className="text-zinc-300 text-sm font-medium">
-                          {incident.isResolved ? "Resolved" : "Ongoing"}
-                        </span>
-                      </div>
-                      <div className="text-xs text-zinc-400 mt-1">
-                        Started: {new Date(incident.startTime).toLocaleString()}
-                      </div>
-                      {incident.endTime && (
-                        <div className="text-xs text-zinc-400">
-                          Ended: {new Date(incident.endTime).toLocaleString()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      {incident.duration ? (
-                        <div className="text-orange-400 text-sm font-medium">{formatDuration(incident.duration)}</div>
-                      ) : (
-                        <div className="text-red-400 text-sm font-medium">Ongoing</div>
-                      )}
-                      <div className="text-xs text-zinc-400 mt-1">Response: {incident.responseTime}ms</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-[#111113] rounded-lg p-4 border border-zinc-800/50">
-            <div className="flex items-center mb-3">
-              <div className="h-2 w-2 rounded-full bg-orange-400 mr-2"></div>
-              <h2 className="text-sm font-medium text-zinc-300">Recent Incidents</h2>
-            </div>
-            <div className="py-6 text-center text-zinc-500">
-              <Shield className="h-10 w-10 text-zinc-700 mx-auto mb-2" />
-              <p className="text-sm">No incidents recorded</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
