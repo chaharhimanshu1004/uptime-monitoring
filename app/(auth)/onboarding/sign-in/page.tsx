@@ -9,6 +9,7 @@ import { Gauge } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import toast from "react-hot-toast"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
@@ -42,8 +43,18 @@ export default function SignInPage() {
       if (result?.url) {
         router.replace("/dashboard")
       }
+    } catch (err) {
+      console.log('Error occurred while signing you in!', err);
+      toast.error("Error signing you in, Please try again!", {
+        style: {
+          borderRadius: "10px",
+          background: "rgba(170, 50, 60, 0.9)",
+          color: "#fff",
+          backdropFilter: "blur(10px)",
+        },
+      })
     } finally {
-      setLoadingSignIn(false) 
+      setLoadingSignIn(false)
     }
   }
 
@@ -168,7 +179,7 @@ export default function SignInPage() {
         </form>
         <p className="mt-4 text-center text-sm text-zinc-400">
           Don't have an account?{" "}
-          <a href="#" className="font-medium text-purple-500 hover:text-purple-400">
+          <a href="/onboarding/sign-up" className="font-medium text-purple-500 hover:text-purple-400">
             Sign up
           </a>
         </p>

@@ -16,7 +16,7 @@ const GetStarted = () => {
     if(session){
       router.push("/dashboard");
     }else{
-      router.push("/onboarding/sign-up");
+      router.push("/onboarding/sign-in");
     }
   }
 
