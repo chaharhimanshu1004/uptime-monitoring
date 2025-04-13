@@ -61,6 +61,7 @@ export const authoptions: NextAuthOptions = {
                 
                 if (existingUser) {
                     user.id = existingUser?.id.toString();
+                    user.name = existingUser.name;
                     return true;
                 } else {
                     try {
@@ -82,17 +83,20 @@ export const authoptions: NextAuthOptions = {
             }
             return true;
         },
-        async jwt({token, user }) { // this user is the user that we have returned from the credentials authorize function
+        async jwt({token, user, trigger, session }) { // this user is the user that we have returned from the credentials authorize function
             // we can only put id in the token which is by defauly, 
             // but we will be putting the email and name other stuffs as well so that we dont require to fetch the user from the database everytime,
             // yes payload size will be bigger but its okay when we dont need to fetch the user everytime
             // same for session, put everything there, and whenever we have the session access or token access, we can fetch the data whenever we feel
-            
-            if(user){
+
+            if (trigger === 'update' && session?.user?.name) {
+                token.name = session.user.name;
+            }
+            else if (user) {
                 token.id = user.id?.toString();
                 token.isVerified = user.isVerified;
                 token.name = user.name;
-             }
+            }
             return token
 
         },
