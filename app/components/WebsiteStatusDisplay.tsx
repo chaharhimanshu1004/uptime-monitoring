@@ -278,7 +278,6 @@ export function WebsiteStatusDisplay() {
         />
       )}
 
-      {/* Add Pause Confirmation Modal */}
       {websiteToPause && (
         <PauseConfirmationModal
           isOpen={pauseModalOpen}

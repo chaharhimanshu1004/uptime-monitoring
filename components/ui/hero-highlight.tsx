@@ -64,13 +64,10 @@ export const HeroHighlightForFeatureDemo = ({
         containerClassName
       )}
     >
-      {/* More visible dotted background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#333_2px,transparent_2px)] [background-size:24px_24px] opacity-60" />
       
-      {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/40" />
       
-      {/* Ambient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[200px] w-[600px] bg-fuchsia-500/20 blur-[120px] rounded-full" />
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[200px] w-[600px] bg-cyan-500/20 blur-[120px] rounded-full" />
 
