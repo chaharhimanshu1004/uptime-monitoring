@@ -50,6 +50,7 @@ export function WebsiteStatusDisplay() {
   // Add state for pause confirmation modal
   const [pauseModalOpen, setPauseModalOpen] = useState(false)
   const [websiteToPause, setWebsiteToPause] = useState<Website | null>(null)
+  const [deletingMonitor, setDeletingMonitor] = useState(false)
 
   let userId: string | number | undefined = user?.id
 
@@ -206,6 +207,7 @@ export function WebsiteStatusDisplay() {
     if (!websiteToDelete) return
 
     try {
+      setDeletingMonitor(true)
       await axios.delete(`/api/user/delete-website?websiteId=${websiteToDelete.id}`)
       setWebsites((prev) => prev.filter((site) => site.id !== websiteToDelete.id))
 
@@ -230,6 +232,7 @@ export function WebsiteStatusDisplay() {
       })
     } finally {
       closeDeleteModal()
+      setDeletingMonitor(false)
     }
   }
 
@@ -269,7 +272,9 @@ export function WebsiteStatusDisplay() {
           isOpen={deleteModalOpen}
           onClose={closeDeleteModal}
           onConfirm={confirmDelete}
-          websiteUrl={websiteToDelete.url.replace(/(^\w+:|^)\/\//, "")}
+          type="monitor"
+          itemName={websiteToDelete.url?.replace(/(^\w+:|^)\/\//, "") || ""}
+          isProcessing={deletingMonitor}
         />
       )}
 

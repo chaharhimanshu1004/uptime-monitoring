@@ -52,6 +52,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [pauseDialogOpen, setPauseDialogOpen] = useState(false)
   const [sendingTestAlert, setSendingTestAlert] = useState(false)
+  const [deletingMonitor, setDeletingMonitor] = useState(false)
 
   const { data: session } = useSession();
   const user = session?.user as User
@@ -234,6 +235,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
 
   const handleDeleteMonitor = async () => {
     try {
+      setDeletingMonitor(true)
       await axios.delete(`/api/user/delete-website?websiteId=${websiteId}`)
 
       toast.success("Monitor successfully deleted", {
@@ -259,6 +261,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
       })
     } finally {
       setDeleteDialogOpen(false)
+      setDeletingMonitor(false)
     }
   }
 
@@ -357,7 +360,9 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
             isOpen={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen(false)}
             onConfirm={handleDeleteMonitor}
-            websiteUrl={website.url?.replace(/(^\w+:|^)\/\//, "") || ""}
+            type="monitor"
+            itemName={website.url?.replace(/(^\w+:|^)\/\//, "") || ""}
+            isProcessing={deletingMonitor}
           />
 
           <PauseConfirmationModal
