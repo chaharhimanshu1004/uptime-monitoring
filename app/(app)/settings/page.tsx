@@ -6,13 +6,14 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Shield, Save, Trash2, ExternalLink, LockIcon, CheckCircle, XCircle } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import toast from "react-hot-toast"
+import { DeleteConfirmationModal } from "@/app/components/DeleteConfirmationModal"
+import { signOut } from "next-auth/react"
 
 export default function SettingsPage() {
     const { data: session, status, update } = useSession()
@@ -26,8 +27,7 @@ export default function SettingsPage() {
     const [isFormChanged, setIsFormChanged] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
-
-    console.log('>>>status', status)
+    const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false)
 
     useEffect(() => {
         if (status === "authenticated" && session?.user) {
@@ -44,6 +44,10 @@ export default function SettingsPage() {
 
     const handleInputChange = () => {
         setIsFormChanged(true)
+    }
+
+    const closeDeleteModal = () => {
+        setDeleteAccountDialogOpen(false)
     }
 
     const handleSaveChanges = async () => {
@@ -123,6 +127,7 @@ export default function SettingsPage() {
                 throw new Error(data.error || 'Failed to delete account')
             }
 
+            await signOut({ redirect: false })
             router.push("/")
         } catch (error) {
             console.error('Error deleting account:', error)
@@ -265,7 +270,6 @@ export default function SettingsPage() {
                             </div>
                         </motion.div>
 
-                        {/* Permanently remove account */}
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -301,20 +305,12 @@ export default function SettingsPage() {
                                     </div>
                                     <Button
                                         className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-0 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-all duration-300 min-w-[220px] h-11"
-                                        onClick={handleDeleteAccount}
-                                        disabled={isDeleting}
+                                        onClick={() => setDeleteAccountDialogOpen(true)}
                                     >
-                                        {isDeleting ? (
-                                            <div className="flex items-center">
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                Deleting...
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center">
-                                                <Trash2 className="h-4 w-4 mr-2" />
-                                                Delete my account
-                                            </div>
-                                        )}
+                                        <div className="flex items-center">
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Delete my account
+                                        </div>
                                     </Button>
                                 </div>
                                 <div className="flex items-center">
@@ -379,6 +375,13 @@ export default function SettingsPage() {
                         </motion.div>
                     </div>
                 </SidebarInset>
+                <DeleteConfirmationModal
+                    isOpen={deleteAccountDialogOpen}
+                    onClose={closeDeleteModal}
+                    onConfirm={handleDeleteAccount}
+                    type="account"
+                    isProcessing={isDeleting}
+                />
             </SidebarProvider>
         </div>
     )
