@@ -3,18 +3,22 @@
 import { useState } from "react"
 import { AppSidebar } from "@/components/Sidebar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { Check, CreditCard, Shield, ArrowRight, Sparkles } from "lucide-react"
+import { Check, CreditCard, Shield, ArrowRight, Sparkles, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 
 export default function PricingPage() {
   const [responderLicenses, setResponderLicenses] = useState(1)
   const [selectedPlan, setSelectedPlan] = useState("pay-as-you-go")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const openModal = () => setIsModalOpen(true)
+  const closeModal = () => setIsModalOpen(false)
 
   return (
     <div className="min-h-screen bg-[#0A0A0B]">
@@ -22,7 +26,6 @@ export default function PricingPage() {
         <AppSidebar />
         <SidebarInset className="bg-[#0A0A0B] overflow-auto">
           <div className="max-w-4xl mx-auto p-8 pb-24">
-            {/* Background effects */}
             <div className="fixed top-0 right-0 w-1/2 h-1/2 bg-purple-600/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="fixed bottom-0 left-0 w-1/2 h-1/2 bg-cyan-600/5 blur-[120px] rounded-full pointer-events-none" />
 
@@ -32,13 +35,17 @@ export default function PricingPage() {
               transition={{ duration: 0.3 }}
               className="relative"
             >
-              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-300 mb-2">
-                Billing & Subscription
-              </h1>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-300">
+                  Billing & Subscription
+                </h1>
+                <Badge className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white border-0 uppercase text-xs font-bold tracking-wider">
+                  Beta
+                </Badge>
+              </div>
               <p className="text-zinc-400 mb-8">Manage your subscription plan and billing preferences</p>
             </motion.div>
 
-            {/* Current plan info */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -68,7 +75,6 @@ export default function PricingPage() {
               </div>
             </motion.div>
 
-            {/* Responder licenses */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -134,7 +140,6 @@ export default function PricingPage() {
               </div>
             </motion.div>
 
-            {/* Logs & metrics bundle */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -284,7 +289,10 @@ export default function PricingPage() {
                 </ul>
               </div>
 
-              <Button className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white border-0 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-all duration-300 h-12 px-6 w-full md:w-auto">
+              <Button
+                onClick={openModal}
+                className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white border-0 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-all duration-300 h-12 px-6 w-full md:w-auto"
+              >
                 <div className="flex items-center">
                   <CreditCard className="h-4 w-4 mr-2" />
                   <span>Upgrade plan</span>
@@ -293,7 +301,6 @@ export default function PricingPage() {
               </Button>
             </motion.div>
 
-            {/* Help footer */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -309,14 +316,62 @@ export default function PricingPage() {
                 <p className="text-zinc-400">
                   Contact our support team at{" "}
                   <a
-                    href="mailto:hello@betterstack.com"
+                    href="mailto:uptime.monitoring.dev@gmail.com"
                     className="text-purple-400 hover:text-purple-300 hover:underline"
                   >
-                    hello@betterstack.com
+                    uptime.monitoring.dev@gmail.com
                   </a>
                 </p>
               </div>
             </motion.div>
+
+            <AnimatePresence>
+              {isModalOpen && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                    onClick={closeModal}
+                  />
+                  <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                      className="w-full max-w-md rounded-xl bg-[#141417] border border-purple-500/30 p-6 shadow-2xl shadow-purple-500/10 pointer-events-auto"
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-600/20 to-cyan-500/20 border border-purple-500/30">
+                          <Sparkles className="h-8 w-8 text-purple-400" />
+                        </div>
+                        <h2 className="text-2xl font-semibold text-white mb-2">Coming Soon</h2>
+                        <p className="mb-6 text-zinc-400">
+                          Our premium plans are currently in development and will be available soon. Stay tuned for
+                          exciting new features and pricing options!
+                        </p>
+                        <div className="flex items-center gap-2 bg-purple-500/10 rounded-lg p-3 border border-purple-500/20 mb-6 w-full">
+                          <AlertCircle className="h-5 w-5 text-purple-400 flex-shrink-0" />
+                          <p className="text-purple-300 text-sm text-left">
+                            We're working hard to bring you the best possible pricing options. Thank you for your
+                            patience!
+                          </p>
+                        </div>
+                        <Button
+                          onClick={closeModal}
+                          className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white border-0 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-all duration-300 w-full"
+                        >
+                          Got it
+                        </Button>
+                      </div>
+                    </motion.div>
+                  </div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </SidebarInset>
       </SidebarProvider>
