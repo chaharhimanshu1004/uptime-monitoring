@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/Sidebar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,16 +13,33 @@ import { motion } from "framer-motion"
 import { Shield, Save, Trash2, ExternalLink } from "lucide-react"
 
 export default function SettingsPage() {
-  const { data: session } = useSession()
-  const router = useRouter()
-  const [firstName, setFirstName] = useState(session?.user?.name?.split(" ")[0] || "")
-  const [lastName, setLastName] = useState(session?.user?.name?.split(" ")[1] || "")
-  const [email, setEmail] = useState(session?.user?.email || "")
-  const [phone, setPhone] = useState("+1 555 123 4567")
-  const [timezone, setTimezone] = useState("(GMT+05:30) Chennai")
-  const [isFormChanged, setIsFormChanged] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+    const { data: session, status } = useSession()
+    const router = useRouter()
+  
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [email, setEmail] = useState("")
+    const [timezone, setTimezone] = useState("(GMT+05:30) Chennai")
+    const [isFormChanged, setIsFormChanged] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+
+    console.log('>>>status', status)
+
+    useEffect(() => {
+        if (status === "authenticated" && session?.user) {
+            const firstName = session.user.name?.split(" ")[0] || ""
+            const lastName = session.user.name?.split(" ")[1] || ""
+            const email = session.user.email || ""
+
+            setFirstName(firstName)
+            setLastName(lastName)
+            setEmail(email)
+        }
+    }, [session, status])
+
+
+
 
   const handleInputChange = () => {
     setIsFormChanged(true)
@@ -30,7 +47,6 @@ export default function SettingsPage() {
 
   const handleSaveChanges = async () => {
     setIsSaving(true)
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsSaving(false)
     setIsFormChanged(false)
@@ -38,7 +54,6 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true)
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsDeleting(false)
     router.push("/")
@@ -50,7 +65,6 @@ export default function SettingsPage() {
       .map((part) => part[0])
       .join("")
       .toUpperCase()
-      .substring(0, 2)
   }
 
   return (
@@ -59,7 +73,6 @@ export default function SettingsPage() {
         <AppSidebar />
         <SidebarInset className="bg-[#0A0A0B] overflow-auto">
           <div className="max-w-4xl mx-auto p-8 pb-24">
-            {/* Background effects */}
             <div className="fixed top-0 right-0 w-1/2 h-1/2 bg-purple-600/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="fixed bottom-0 left-0 w-1/2 h-1/2 bg-cyan-600/5 blur-[120px] rounded-full pointer-events-none" />
 
@@ -75,7 +88,6 @@ export default function SettingsPage() {
               <p className="text-zinc-400 mb-8">Manage your personal information and account preferences</p>
             </motion.div>
 
-            {/* Basic account information */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -87,7 +99,7 @@ export default function SettingsPage() {
                 <h2 className="text-xl font-semibold text-white">Basic account information</h2>
               </div>
               <p className="text-zinc-400 mb-6">
-                We'll ask you to click a magic link in your email everytime you sign in.
+                Update your personal information to keep your account secure and up-to-date.
               </p>
 
               <div className="bg-[#111113]/80 backdrop-blur-sm border border-zinc-800/50 rounded-xl p-8 shadow-xl shadow-purple-900/5">
@@ -100,16 +112,9 @@ export default function SettingsPage() {
                       </AvatarFallback>
                     </Avatar>
                     <p className="text-zinc-400 text-sm mt-4 text-center max-w-[180px]">
-                      You can configure your profile picture here or at{" "}
-                      <a
-                        href="https://gravatar.com"
-                        className="text-purple-400 hover:text-purple-300 hover:underline inline-flex items-center"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Gravatar
-                        <ExternalLink className="h-3 w-3 ml-1" />
-                      </a>
+                        <span className="text-white font-medium">{firstName + " " + lastName}</span>
+                        <br />
+                        {email}
                     </p>
                   </div>
 
@@ -145,18 +150,6 @@ export default function SettingsPage() {
                         value={email}
                         onChange={(e) => {
                           setEmail(e.target.value)
-                          handleInputChange()
-                        }}
-                        className="bg-[#141417] border-zinc-800 text-white focus:border-purple-500/50 focus:ring-purple-500/20 h-11 rounded-lg"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm text-zinc-400 mb-2 font-medium">Phone</label>
-                      <Input
-                        value={phone}
-                        onChange={(e) => {
-                          setPhone(e.target.value)
                           handleInputChange()
                         }}
                         className="bg-[#141417] border-zinc-800 text-white focus:border-purple-500/50 focus:ring-purple-500/20 h-11 rounded-lg"
@@ -214,10 +207,12 @@ export default function SettingsPage() {
                       <br />
                       Let us know at{" "}
                       <a
-                        href="mailto:hello@betterstack.com"
+                        href="mailto:uptime.monitoring.dev@gmail.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-purple-400 hover:text-purple-300 hover:underline"
                       >
-                        hello@betterstack.com
+                        uptime.monitoring.dev@gmail.com
                       </a>
                     </p>
                   </div>
@@ -248,7 +243,6 @@ export default function SettingsPage() {
               </div>
             </motion.div>
 
-            {/* Save changes button */}
             {isFormChanged && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -275,7 +269,6 @@ export default function SettingsPage() {
               </motion.div>
             )}
 
-            {/* Help footer */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -291,10 +284,12 @@ export default function SettingsPage() {
                 <p className="text-zinc-400">
                   Let us know at{" "}
                   <a
-                    href="mailto:hello@betterstack.com"
+                    href="mailto:uptime.monitoring.dev@gmail.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-purple-400 hover:text-purple-300 hover:underline"
                   >
-                    hello@betterstack.com
+                    uptime.monitoring.dev@gmail.com
                   </a>
                 </p>
               </div>
