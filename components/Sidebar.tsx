@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Gauge, User2, Settings, LogOut, CreditCard } from "lucide-react"
+import { Gauge, User2, Settings, LogOut, CreditCard, Gem } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOut, useSession } from "next-auth/react"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
@@ -25,6 +25,11 @@ const menuItems = [
     label: "Settings",
     href: "/settings",
   },
+  {
+    icon: Gem,
+    label: "Billing",
+    href: "/billing",
+  }
 ]
 
 export function AppSidebar() {
