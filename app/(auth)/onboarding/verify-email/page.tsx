@@ -16,18 +16,18 @@ export default function VerifyEmailPage() {
   const router = useRouter()
   const email = searchParams.get("email")
 
-  // if (!email) {
-  //   toast.error("Error in signing you up", {
-  //     style: {
-  //       borderRadius: "10px",
-  //       background: "rgba(170, 50, 60, 0.9)",
-  //       color: "#fff",
-  //       backdropFilter: "blur(10px)",
-  //     },
-  //   })
-  //   router.push('/');
-  //   return;
-  // }
+  if (!email) {
+    toast.error("Error in signing you up", {
+      style: {
+        borderRadius: "10px",
+        background: "rgba(170, 50, 60, 0.9)",
+        color: "#fff",
+        backdropFilter: "blur(10px)",
+      },
+    })
+    router.push('/');
+    return;
+  }
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [error, setError] = useState("")
