@@ -1,7 +1,27 @@
 "use client"
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function VerifyEmailPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter(); 
+  const email = searchParams.get("email")
+
+  if (!email) {
+    toast.error("Error in signing you up", {
+      style: {
+        borderRadius: "10px",
+        background: "rgba(170, 50, 60, 0.9)",
+        color: "#fff",
+        backdropFilter: "blur(10px)",
+      },
+    })
+    router.push('/');
+    return;
+  }
+
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('An OTP has been sent to your email. Please verify.');
@@ -19,9 +39,9 @@ export default function VerifyEmailPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ otp }),
+        body: JSON.stringify({ email, code: otp }),
       });
-      // Handle the response here
+      console.log('>>>result is ', result);
       if (result.ok) {
         setMessage('Email verified successfully!');
         setError('');

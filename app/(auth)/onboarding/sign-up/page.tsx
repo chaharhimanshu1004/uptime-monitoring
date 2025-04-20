@@ -28,7 +28,21 @@ export default function SignupPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, password }),
-      })     
+      })
+      if (response.redirected) {
+        const redirectUrl = new URL(response.url);
+        redirectUrl.searchParams.set("email", email);
+        router.push(redirectUrl.toString());
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Something went wrong.");
+        return;
+      }
+      router.push(`/onboarding/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err) {
       console.log("Error occurred while signing you up!", err)
       setError("An error occurred while signing you up!")
