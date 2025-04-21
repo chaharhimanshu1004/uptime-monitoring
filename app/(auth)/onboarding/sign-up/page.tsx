@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,6 +23,7 @@ export default function SignupPage() {
       return
     }
     try {
+      setLoading(true)
       const response = await fetch("/api/user/sign-up", {
         method: "POST",
         headers: {
@@ -46,6 +48,8 @@ export default function SignupPage() {
     } catch (err) {
       console.log("Error occurred while signing you up!", err)
       setError("An error occurred while signing you up!")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -128,12 +132,16 @@ export default function SignupPage() {
           </div>
 
           {error && <p className="text-red-400 text-center">{error}</p>}
-
           <Button
             type="submit"
+            disabled={loading}
             className="w-full bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
           >
-            Sign Up
+            {loading ? (
+              <div className="w-5 h-5 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </form>
         <p className="mt-4 text-center font-semibold text-md text-zinc-400">
