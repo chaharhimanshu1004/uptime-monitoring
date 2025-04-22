@@ -116,7 +116,6 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
 
     fetchStats()
   }, [websiteId, period])
-  console.log('>>>regions available are: ', availableRegions)
 
   const filteredStats = region === "asia" ? stats : stats.filter((s) => s.region === region)
 
