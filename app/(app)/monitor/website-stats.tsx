@@ -19,6 +19,7 @@ interface WebsiteStats {
   timestamp: string
   status: string
   responseTime: number
+  region: string
 }
 
 interface Website {
@@ -53,6 +54,8 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   const [pauseDialogOpen, setPauseDialogOpen] = useState(false)
   const [sendingTestAlert, setSendingTestAlert] = useState(false)
   const [deletingMonitor, setDeletingMonitor] = useState(false)
+  const [region, setRegion] = useState<string>("asia")
+  const [availableRegions, setAvailableRegions] = useState<string[]>([])
 
   const { data: session } = useSession();
   const user = session?.user as User
@@ -103,6 +106,8 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
         )
 
         setStats(sortedStats)
+        const regions = Array.from(new Set(sortedStats.map((s: WebsiteStats) => s.region)))
+        setAvailableRegions([...(regions as string[])])
       } catch (error) {
         console.error("Failed to fetch stats:", error)
       }
@@ -111,16 +116,19 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
 
     fetchStats()
   }, [websiteId, period])
+  console.log('>>>regions available are: ', availableRegions)
+
+  const filteredStats = region === "asia" ? stats : stats.filter((s) => s.region === region)
 
   const uptime =
-    stats?.length > 0 ? ((stats.filter((s) => s.status === "up").length / stats.length) * 100).toFixed(2) : "0"
+    filteredStats.length > 0 ? ((filteredStats?.filter((s) => s.status === "up").length / filteredStats?.length) * 100).toFixed(2) : "0"
 
   const avgResponseTime =
-    stats?.length > 0 ? (stats.reduce((acc, s) => acc + s.responseTime, 0) / stats.length).toFixed(2) : "0"
+    filteredStats.length > 0 ? (filteredStats?.reduce((acc, s) => acc + s.responseTime, 0) / filteredStats?.length).toFixed(2) : "0"
 
-  const minResponseTime = stats?.length > 0 ? Math.min(...stats.map((s) => s.responseTime)).toFixed(2) : "0"
+  const minResponseTime = filteredStats?.length > 0 ? Math.min(...filteredStats?.map((s) => s.responseTime)).toFixed(2) : "0"
 
-  const maxResponseTime = stats?.length > 0 ? Math.max(...stats.map((s) => s.responseTime)).toFixed(2) : "0"
+  const maxResponseTime = filteredStats?.length > 0 ? Math.max(...filteredStats?.map((s) => s.responseTime)).toFixed(2) : "0"
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -654,9 +662,23 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
           ) : (
             <>
               <div className="bg-[#111113] rounded-lg p-4 border border-zinc-800/50">
-                <div className="flex items-center mb-3">
-                  <div className="h-2 w-2 rounded-full bg-blue-400 mr-2"></div>
-                  <h2 className="text-sm font-medium text-zinc-300">Response Time History</h2>
+                <div className="flex items-center mb-3 justify-between">
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-blue-400 mr-2"></div>
+                    <h2 className="text-sm font-medium text-zinc-300">Response Time History</h2>
+                  </div>
+                  <Select value={region} onValueChange={setRegion}>
+                    <SelectTrigger className="w-[140px] bg-zinc-900/80 border-zinc-800 text-white h-8">
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                      {availableRegions.map((r) => (
+                        <SelectItem key={r} value={r} className="text-white focus:bg-zinc-800 focus:text-white">
+                          {r === "asia" ? "Asia" : r}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 {stats.length === 0 ? (
                   <div className="h-[400px] flex items-center justify-center text-zinc-500">
@@ -668,7 +690,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                 ) : (
                   <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={stats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <AreaChart data={filteredStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id="responseTimeGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -723,7 +745,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                 ) : (
                   <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={stats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <AreaChart data={filteredStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id="statusGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />

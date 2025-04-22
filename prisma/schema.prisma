@@ -50,6 +50,7 @@ model WebsiteStatus {
   websiteId    Int
   status       String
   responseTime Int
+  region       String       
   timestamp    DateTime @default(now())
   website      Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
 
