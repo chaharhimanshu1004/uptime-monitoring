@@ -1,6 +1,7 @@
 import redis from "./redis";
 
 const QUEUE_NAME = "uptime-monitoring-queue";
+const REGIONS = ["asia", "europe"];
 // const USER_WEBSITES_SET = "user-websites:";
 
 interface WebsiteCheck {
@@ -10,13 +11,16 @@ interface WebsiteCheck {
   userId: string;
   userEmail: string;
   isPaused: boolean;
+  region: string;
 }
 
 export async function registerWebsite(url: string,userId:string,userEmail:string,websiteId:number) {
   const initialCheckTime = Date.now();
   // await addWebsiteToQueue({ url, nextCheckTime: initialCheckTime,userId });
-  const check: WebsiteCheck = { url, nextCheckTime: initialCheckTime, userId,userEmail , id: websiteId , isPaused: false };
-  await addWebsiteToQueue(check);
+  for (const region of REGIONS) {
+    const check: WebsiteCheck = { url, nextCheckTime: initialCheckTime, userId, userEmail, id: websiteId, isPaused: false, region };
+    await addWebsiteToQueue(check);
+  }
   // await Promise.all([
   //   addWebsiteToQueue(check),
   //   addWebsiteToUserSet(userId, url)
@@ -28,7 +32,8 @@ export async function registerWebsite(url: string,userId:string,userEmail:string
 // }
 
 async function addWebsiteToQueue(check: WebsiteCheck) {
-  await redis.zadd(QUEUE_NAME, check.nextCheckTime, JSON.stringify(check));
+  const REGION_WISE_QUEUE_NAME = `${QUEUE_NAME}-${check.region}`;
+  await redis.zadd(REGION_WISE_QUEUE_NAME, check.nextCheckTime, JSON.stringify(check));
 }
 
 export async function unregisterWebsite(websiteId: number): Promise<boolean> {

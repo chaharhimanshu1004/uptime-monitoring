@@ -673,7 +673,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                     <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                       {availableRegions.map((r) => (
                         <SelectItem key={r} value={r} className="text-white focus:bg-zinc-800 focus:text-white">
-                          {r === "asia" ? "Asia" : r}
+                          {r ? r.charAt(0).toUpperCase() + r.slice(1) : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
