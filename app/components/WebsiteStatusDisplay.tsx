@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import type { User } from "next-auth"
 import axios from "axios"
-import { MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings, Activity } from "lucide-react"
+import { MoreHorizontal, Plus, Search, SlidersHorizontal, ExternalLink, Gauge, Pause, Play, Trash2, AlertCircle, Settings, Activity, Radio } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal"
 import { PauseConfirmationModal } from "./PauseConfirmationModal" 
 import toast from "react-hot-toast"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Website {
   id: string | number
@@ -456,7 +457,19 @@ export function WebsiteStatusDisplay() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500">3m</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-[.40rem]">
+                        <Radio className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-400">3m</span>
+                      </div>
+                    </TooltipTrigger>
+
+                    <TooltipContent side="top">
+                      Website is checked every 3 minutes
+                    </TooltipContent>
+                  </Tooltip>
+                  
                   <div className="flex">
                     <Button
                       variant="ghost"
