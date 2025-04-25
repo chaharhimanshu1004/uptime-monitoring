@@ -1,11 +1,13 @@
 import React from "react"
 import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 
 interface PauseConfirmationModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
   websiteUrl: string
+  isProcessing?: boolean
 }
 
 export const PauseConfirmationModal: React.FC<PauseConfirmationModalProps> = ({
@@ -13,6 +15,7 @@ export const PauseConfirmationModal: React.FC<PauseConfirmationModalProps> = ({
   onClose,
   onConfirm,
   websiteUrl,
+  isProcessing = false
 }) => {
   if (!isOpen) return null
 
@@ -29,9 +32,18 @@ export const PauseConfirmationModal: React.FC<PauseConfirmationModalProps> = ({
           </Button>
           <Button
             onClick={onConfirm}
+            disabled={isProcessing}
             className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white hover:opacity-90"
           >
-            Pause Monitor
+            {isProcessing ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                    Processing...
+                </span>
+              ) : (
+                "Pause Monitor"
+              )
+            }
           </Button>
         </div>
       </div>
