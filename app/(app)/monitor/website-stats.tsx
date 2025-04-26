@@ -29,7 +29,8 @@ interface Website {
   updatedAt?: Date
   createdAt?: Date
   isPaused?: boolean
-  lastCheckedAt?: Date | string | null
+  isDNSResolved: boolean
+  lastCheckedAt: Date | string | null
   lastDownAt?: Date | string | null
   incidentCount: number
   incidents?: Incident[]
@@ -57,6 +58,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   const [region, setRegion] = useState<string>("asia")
   const [availableRegions, setAvailableRegions] = useState<string[]>([])
   const [lastCheckedAt, setLastCheckedAt] = useState<Date | string | null>(null)
+  const [isDNSResolved, setIsDNSResolved] = useState(false)
 
   const REFRESH_STATS_INTERVAL = 25 * 1000 // 25 seconds
   const REFRESH_WEBSITE_INTERVAL = 40 * 1000 // 35 seconds
@@ -74,10 +76,11 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
       try {
         const response = await axios.get(`/api/user/get-websites?userId=${userId}`)
         const websites = response?.data?.websites || []
-        const foundWebsite = websites.find((site: Website) => site.id.toString() === websiteId.toString())
+        const foundWebsite: Website = websites.find((site: Website) => site.id.toString() === websiteId.toString())
 
         if (foundWebsite) {
           setWebsite(foundWebsite)
+          setIsDNSResolved(foundWebsite.isDNSResolved)
           setLastCheckedAt(foundWebsite.lastCheckedAt)
         } else {
           console.error("Website not found")
