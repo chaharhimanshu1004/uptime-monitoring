@@ -24,6 +24,7 @@ interface Website {
   createdAt?: Date
   isPaused?: boolean
   isUp: boolean
+  isDNSResolved: boolean
   isChecking: boolean
   lastCheckedAt?: Date | string | null
   lastDownAt?: Date | string | null
@@ -497,11 +498,17 @@ export function WebsiteStatusDisplay() {
                       {website?.isPaused ? (
                         <span className="text-yellow-400">Paused</span>
                       ) : website?.isChecking ? (
-                        <span className="text-cyan-500"> Checking... </span>
+                        <span className="text-cyan-500">Checking...</span>
+                      ) : website?.isDNSResolved === false ? (
+                        <span className="text-red-400">DNS not resolved</span>
                       ) : website?.isUp ? (
-                        <span className="text-emerald-400">Up • {formatUptimeDuration(website?.lastUpAt)}</span>
+                        <span className="text-emerald-400">
+                          Up • {formatUptimeDuration(website?.lastUpAt)}
+                        </span>
                       ) : (
-                        <span className="text-red-400">Down • {formatUptimeDuration(website?.lastDownAt)}</span>
+                        <span className="text-red-400">
+                          Down • {formatUptimeDuration(website?.lastDownAt)}
+                        </span>
                       )}
                     </div>
                   </div>
