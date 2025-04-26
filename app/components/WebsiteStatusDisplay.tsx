@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useSession } from "next-auth/react"
 import type { User } from "next-auth"
 import axios from "axios"
@@ -23,7 +23,8 @@ interface Website {
   updatedAt?: Date
   createdAt?: Date
   isPaused?: boolean
-  isUp?: boolean
+  isUp: boolean
+  isChecking: boolean
   lastCheckedAt?: Date | string | null
   lastDownAt?: Date | string | null
   lastUpAt?: Date | string | null 
@@ -52,6 +53,12 @@ export function WebsiteStatusDisplay() {
   const [pauseModalOpen, setPauseModalOpen] = useState(false)
   const [websiteToPause, setWebsiteToPause] = useState<Website | null>(null)
   const [deletingMonitor, setDeletingMonitor] = useState(false)
+  const [pausingMonitor, setPausingMonitor] = useState(false)
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+
+  const POLL_MS = 5000 // 5 seconds
 
   let userId: string | number | undefined = user?.id
 
@@ -76,6 +83,35 @@ export function WebsiteStatusDisplay() {
       setIsLoading(false)
     }
   }, [userId])
+
+  useEffect(() => {
+    const stillChecking = websites.some(w => w.isChecking);
+
+    if (stillChecking && timerRef.current === null) {
+      timerRef.current = setInterval(async () => {
+        try {
+          const { data } = await axios.get(
+            `/api/user/get-websites?userId=${userId}`
+          );
+          setWebsites(data.websites ?? []);
+        } catch (err) {
+          console.error("Polling error", err);
+        }
+      }, POLL_MS);
+    }
+
+    if (!stillChecking && timerRef.current !== null) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    return () => {
+      if (timerRef.current !== null) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [websites, userId]);
+
 
   const handleWebsiteClick = (id: string | number) => {
     router.push(`/monitor/${id}`)
@@ -112,7 +148,7 @@ export function WebsiteStatusDisplay() {
           prev.map((site) => (site.id === websiteId ? { ...site, isPaused: true } : site)),
         )
 
-        toast.error("Error updating monitor status!", {
+        toast.error("Error resuming monitor !", {
           style: {
             borderRadius: "10px",
             background: "rgba(170, 50, 60, 0.9)",
@@ -152,6 +188,7 @@ export function WebsiteStatusDisplay() {
     if (!websiteToPause) return
 
     try {
+      setPausingMonitor(true)
       setWebsites((prev) =>
         prev.map((site) => (site.id === websiteToPause.id ? { ...site, isPaused: true } : site)),
       )
@@ -175,7 +212,7 @@ export function WebsiteStatusDisplay() {
         prev.map((site) => (site.id === websiteToPause.id ? { ...site, isPaused: false } : site)),
       )
 
-      toast.error("Error updating monitor status!", {
+      toast.error("Error pausing monitor, Please Try again!", {
         style: {
           borderRadius: "10px",
           background: "rgba(170, 50, 60, 0.9)",
@@ -184,6 +221,7 @@ export function WebsiteStatusDisplay() {
         },
       })
     } finally {
+      setPausingMonitor(false)
       closePauseModal()
     }
   }
@@ -285,6 +323,7 @@ export function WebsiteStatusDisplay() {
           onClose={closePauseModal}
           onConfirm={confirmPause}
           websiteUrl={websiteToPause.url.replace(/(^\w+:|^)\/\//, "")}
+          isProcessing={pausingMonitor}
         />
       )}
 
@@ -426,7 +465,18 @@ export function WebsiteStatusDisplay() {
               >
                 <div className="flex items-center gap-3">
                   <div className="relative flex items-center justify-center w-3 h-3">
-                    {!website.isPaused ? (
+                    {website.isPaused ? (
+                      <span className="relative inline-flex w-2 h-2 bg-yellow-500 rounded-full"></span>
+                    ) : website.isChecking ? (
+                      <>
+                        <span
+                          className='absolute inline-flex w-full h-full duration-1000 rounded-full opacity-75 animate-ping bg-cyan-400'
+                        ></span>
+                        <span
+                          className='relative inline-flex w-2 h-2 rounded-full bg-cyan-400'
+                        ></span>
+                      </>
+                    ) : (
                       <>
                         <span
                           className={`absolute inline-flex w-full h-full duration-1000 rounded-full opacity-75 animate-ping ${website.isUp ? 'bg-green-400' : 'bg-red-400'
@@ -437,8 +487,6 @@ export function WebsiteStatusDisplay() {
                             }`}
                         ></span>
                       </>
-                    ) : (
-                      <span className="relative inline-flex w-2 h-2 bg-yellow-500 rounded-full"></span>
                     )}
                   </div>
                   <div>
@@ -446,12 +494,14 @@ export function WebsiteStatusDisplay() {
                       {website.url.replace(/(^\w+:|^)\/\//, "")}
                     </div>
                     <div className="text-sm flex items-center">
-                      {website.isPaused ? (
+                      {website?.isPaused ? (
                         <span className="text-yellow-400">Paused</span>
-                      ) : website.isUp ? (
-                        <span className="text-emerald-400">Up • {formatUptimeDuration(website.lastUpAt)}</span>
+                      ) : website?.isChecking ? (
+                        <span className="text-cyan-500"> Checking... </span>
+                      ) : website?.isUp ? (
+                        <span className="text-emerald-400">Up • {formatUptimeDuration(website?.lastUpAt)}</span>
                       ) : (
-                        <span className="text-red-400">Down • {formatUptimeDuration(website.lastDownAt)}</span>
+                        <span className="text-red-400">Down • {formatUptimeDuration(website?.lastDownAt)}</span>
                       )}
                     </div>
                   </div>
