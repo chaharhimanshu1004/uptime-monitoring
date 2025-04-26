@@ -11,6 +11,9 @@ interface WebsiteCheck {
   userId: string;
   userEmail: string;
   isPaused: boolean;
+  isFirstCheck: boolean;
+  isEmailSent: boolean;
+  lastEmailSentAt: Date | null;
   region: string;
 }
 
@@ -18,7 +21,7 @@ export async function registerWebsite(url: string,userId:string,userEmail:string
   const initialCheckTime = Date.now();
   // await addWebsiteToQueue({ url, nextCheckTime: initialCheckTime,userId });
   for (const region of REGIONS) {
-    const check: WebsiteCheck = { url, nextCheckTime: initialCheckTime, userId, userEmail, id: websiteId, isPaused: false, region };
+    const check: WebsiteCheck = { url, nextCheckTime: initialCheckTime, userId, userEmail, id: websiteId, isPaused: false, isFirstCheck: true, region, isEmailSent: false, lastEmailSentAt: null };
     await addWebsiteToQueue(check);
   }
   // await Promise.all([
