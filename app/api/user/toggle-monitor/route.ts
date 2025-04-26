@@ -69,9 +69,15 @@ export async function POST(request: Request) {
 
         // if paused : remove from redis else add in redis 
         if (action === "pause") {
-            await pauseWebsiteMonitoring(websiteId);
+            const isPaused = await pauseWebsiteMonitoring(websiteId);
+            if (!isPaused) {
+                throw new Error("Failed to pause website monitoring from queue");
+            }
         } else {
-            await resumeWebsiteMonitoring(websiteId);
+            const isResumed = await resumeWebsiteMonitoring(websiteId);
+            if (!isResumed) {
+                throw new Error("Failed to resume website monitoring from queue");
+            }
         }
 
         return Response.json({ 

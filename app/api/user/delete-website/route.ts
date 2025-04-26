@@ -46,7 +46,11 @@ export async function DELETE(request: Request) {
             )
         }
 
-        await unregisterWebsite(websiteId); 
+        const response = await unregisterWebsite(websiteId); 
+
+        if (!response) {
+            throw new Error("Failed to unregister website from monitoring queue");
+        }
 
         await prisma.website.delete({
             where: {
