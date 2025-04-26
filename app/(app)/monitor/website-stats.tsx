@@ -56,6 +56,10 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   const [deletingMonitor, setDeletingMonitor] = useState(false)
   const [region, setRegion] = useState<string>("asia")
   const [availableRegions, setAvailableRegions] = useState<string[]>([])
+  const [lastCheckedAt, setLastCheckedAt] = useState<Date | string | null>(null)
+
+  const REFRESH_STATS_INTERVAL = 25 * 1000 // 25 seconds
+  const REFRESH_WEBSITE_INTERVAL = 40 * 1000 // 35 seconds
 
   const { data: session } = useSession();
   const user = session?.user as User
@@ -74,6 +78,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
 
         if (foundWebsite) {
           setWebsite(foundWebsite)
+          setLastCheckedAt(foundWebsite.lastCheckedAt)
         } else {
           console.error("Website not found")
           toast.error("Website not found", {
@@ -91,12 +96,18 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
     }
 
     fetchWebsite()
+
+    const fetchWebsiteInterval = setInterval(() => {
+      fetchWebsite()
+    }, REFRESH_WEBSITE_INTERVAL)
+  
+    return () => clearInterval(fetchWebsiteInterval) 
   }, [userId, websiteId])
 
-
   useEffect(() => {
-    const fetchStats = async () => {
-      setLoading(true)
+    const fetchStats = async (isInitialLoad = false) => {
+      if (isInitialLoad) setLoading(true)
+
       try {
         const response = await fetch(`/api/website-stats?websiteId=${websiteId}&period=${period}`)
         const data = await response.json()
@@ -110,12 +121,20 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
         setAvailableRegions([...(regions as string[])])
       } catch (error) {
         console.error("Failed to fetch stats:", error)
+      } finally {
+        if (isInitialLoad) setLoading(false)
       }
-      setLoading(false)
     }
 
-    fetchStats()
+    fetchStats(true) // for initial load
+
+    const fetchStatsInterval = setInterval(() => {
+      fetchStats(false)
+    }, REFRESH_STATS_INTERVAL)
+
+    return () => clearInterval(fetchStatsInterval)
   }, [websiteId, period])
+
 
   const filteredStats = region === "asia" ? stats : stats.filter((s) => s.region === region)
 
@@ -636,7 +655,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                   <Clock className="h-4 w-4 text-blue-400" />
                 </div>
                 <div className="text-lg font-bold text-blue-400 mt-1 truncate">
-                  {website?.lastCheckedAt ? formatRelativeTime(website.lastCheckedAt) : "Never"}
+                  {lastCheckedAt ? formatRelativeTime(lastCheckedAt) : "Never"}
                 </div>
               </div>
             </div>
