@@ -33,7 +33,7 @@ export const PauseConfirmationModal: React.FC<PauseConfirmationModalProps> = ({
           <Button
             onClick={onConfirm}
             disabled={isProcessing}
-            className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white hover:opacity-90"
+            className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-white hover:opacity-90"
           >
             {isProcessing ? (
                 <span className="flex items-center justify-center gap-2">

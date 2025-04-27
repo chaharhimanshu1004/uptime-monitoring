@@ -197,7 +197,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
         })
 
         await axios.post(`/api/user/toggle-monitor`, {
-          websiteId,
+          websiteId: Number(websiteId),
           action: "resume",
         })
 
@@ -241,7 +241,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
       })
 
       await axios.post(`/api/user/toggle-monitor`, {
-        websiteId,
+        websiteId: Number(websiteId),
         action: "pause",
       })
 
@@ -462,7 +462,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                       size="sm"
                       className={`${
                         website.isPaused
-                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          ? "bg-emerald-800 hover:bg-emerald-900 text-white"
                           : "bg-amber-600 hover:bg-amber-700 text-white"
                       }`}
                       onClick={handleToggleMonitor}
@@ -688,7 +688,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                     size="sm"
                     className={`${
                       website.isPaused
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        ? "bg-emerald-800 hover:bg-emerald-900 text-white"
                         : "bg-amber-600 hover:bg-amber-700 text-white"
                     }`}
                     onClick={handleToggleMonitor}
