@@ -374,11 +374,11 @@ export function WebsiteStatusDisplay() {
         className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
       >
         <div className="bg-[#141417]/80 rounded-xl border border-[#232328] backdrop-blur-sm p-6 flex flex-col">
-          <div className="text-gray-400 text-sm mb-2">Total Uptime</div>
+          <div className="text-gray-400 text-sm mb-2">Alerting via</div>
           <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">
-            99.9%
+            Email
           </div>
-          <div className="text-gray-400 text-xs mt-1">Last 30 days</div>
+          <div className="text-gray-400 text-xs mt-1">Every hour</div>
         </div>
         <div className="bg-[#141417]/80 rounded-xl border border-[#232328] backdrop-blur-sm p-6 flex flex-col">
           <div className="text-gray-400 text-sm mb-2">Monitoring</div>

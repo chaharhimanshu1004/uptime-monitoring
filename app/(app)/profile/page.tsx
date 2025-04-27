@@ -122,7 +122,7 @@ const ProfileDashboard = () => {
                             </div>
                             <div>
                               <div className="text-white font-medium">{website.url.replace(/(^\w+:|^)\/\//, "")}</div>
-                              <div className="text-sm text-zinc-400">{website.isPaused ? "Paused" : "Actively Monitoring"}</div>
+                              <div className="text-sm text-zinc-400">{website.isPaused ? "Monitoring Paused" : "Actively Monitoring"}</div>
                             </div>
                           </div>
                         </div>
