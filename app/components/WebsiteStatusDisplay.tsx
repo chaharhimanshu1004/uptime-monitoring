@@ -378,7 +378,7 @@ export function WebsiteStatusDisplay() {
           <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">
             Email
           </div>
-          <div className="text-gray-400 text-xs mt-1">Every hour</div>
+          <div className="text-gray-400 text-xs mt-1">Every hour if website goes down</div>
         </div>
         <div className="bg-[#141417]/80 rounded-xl border border-[#232328] backdrop-blur-sm p-6 flex flex-col">
           <div className="text-gray-400 text-sm mb-2">Monitoring</div>
