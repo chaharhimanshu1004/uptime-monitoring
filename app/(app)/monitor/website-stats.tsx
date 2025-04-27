@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { Activity, ChevronRight, Clock, ExternalLink, Globe, Pause, Play, Trash2, ArrowUpRight, ArrowDownRight, Shield, Bell, AlertTriangle, } from "lucide-react"
+import { Activity, ChevronRight, Clock, ExternalLink, Globe, Pause, Play, Trash2, ArrowUpRight, ArrowDownRight, Shield, Bell, AlertTriangle, ServerCrash, RefreshCw, HelpCircle, LinkIcon } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
@@ -58,10 +58,10 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   const [region, setRegion] = useState<string>("asia")
   const [availableRegions, setAvailableRegions] = useState<string[]>([])
   const [lastCheckedAt, setLastCheckedAt] = useState<Date | string | null>(null)
-  const [isDNSResolved, setIsDNSResolved] = useState(false)
+  const [isDNSResolved, setIsDNSResolved] = useState(true) // Default to true for initial loading state
 
+  const REFRESH_WEBSITE_INTERVAL = 40 * 1000 // 40 seconds
   const REFRESH_STATS_INTERVAL = 25 * 1000 // 25 seconds
-  const REFRESH_WEBSITE_INTERVAL = 40 * 1000 // 35 seconds
 
   const { data: session } = useSession();
   const user = session?.user as User
@@ -82,6 +82,14 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
           setWebsite(foundWebsite)
           setIsDNSResolved(foundWebsite.isDNSResolved)
           setLastCheckedAt(foundWebsite.lastCheckedAt)
+
+          // Only fetch stats if DNS is resolved
+          if (foundWebsite.isDNSResolved) {
+            fetchStats(true)
+          } else {
+            // If DNS is not resolved, set loading to false
+            setLoading(false)
+          }
         } else {
           console.error("Website not found")
           toast.error("Website not found", {
@@ -103,41 +111,45 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
     const fetchWebsiteInterval = setInterval(() => {
       fetchWebsite()
     }, REFRESH_WEBSITE_INTERVAL)
-  
-    return () => clearInterval(fetchWebsiteInterval) 
+
+    return () => clearInterval(fetchWebsiteInterval)
   }, [userId, websiteId])
 
-  useEffect(() => {
-    const fetchStats = async (isInitialLoad = false) => {
-      if (isInitialLoad) setLoading(true)
+  const fetchStats = async (isInitialLoad = false) => {
+    // Don't fetch stats if DNS is not resolved
+    if (!isDNSResolved) return
 
-      try {
-        const response = await fetch(`/api/website-stats?websiteId=${websiteId}&period=${period}`)
-        const data = await response.json()
+    if (isInitialLoad) setLoading(true)
 
-        const sortedStats = data.stats.sort(
-          (a: WebsiteStats, b: WebsiteStats) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-        )
+    try {
+      const response = await fetch(`/api/website-stats?websiteId=${websiteId}&period=${period}`)
+      const data = await response.json()
 
-        setStats(sortedStats)
-        const regions = Array.from(new Set(sortedStats.map((s: WebsiteStats) => s.region)))
-        setAvailableRegions([...(regions as string[])])
-      } catch (error) {
-        console.error("Failed to fetch stats:", error)
-      } finally {
-        if (isInitialLoad) setLoading(false)
-      }
+      const sortedStats = data.stats.sort(
+        (a: WebsiteStats, b: WebsiteStats) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      )
+
+      setStats(sortedStats)
+      const regions = Array.from(new Set(sortedStats.map((s: WebsiteStats) => s.region)))
+      setAvailableRegions([...(regions as string[])])
+    } catch (error) {
+      console.error("Failed to fetch stats:", error)
+    } finally {
+      if (isInitialLoad) setLoading(false)
     }
+  }
 
-    fetchStats(true) // for initial load
+  useEffect(() => {
+    if (isDNSResolved) {
+      fetchStats(true)
 
-    const fetchStatsInterval = setInterval(() => {
-      fetchStats(false)
-    }, REFRESH_STATS_INTERVAL)
+      const fetchStatsInterval = setInterval(() => {
+        fetchStats(false)
+      }, REFRESH_STATS_INTERVAL)
 
-    return () => clearInterval(fetchStatsInterval)
-  }, [websiteId, period])
-
+      return () => clearInterval(fetchStatsInterval)
+    }
+  }, [websiteId, period, isDNSResolved])
 
   const filteredStats = region === "asia" ? stats : stats.filter((s) => s.region === region)
 
@@ -294,22 +306,6 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
     }
   }
 
-  function formatDuration(seconds: number): string {
-    if (!seconds) return "0 seconds"
-
-    if (seconds < 60) {
-      return `${seconds} seconds`
-    } else if (seconds < 3600) {
-      const minutes = Math.floor(seconds / 60)
-      const remainingSeconds = seconds % 60
-      return `${minutes}m ${remainingSeconds}s`
-    } else {
-      const hours = Math.floor(seconds / 3600)
-      const minutes = Math.floor((seconds % 3600) / 60)
-      return `${hours}h ${minutes}m`
-    }
-  }
-
   function formatRelativeTime(timestamp: string | Date | null | undefined): string {
     if (!timestamp) return "Never"
 
@@ -381,6 +377,261 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
     }
   }
 
+  const handleManualRefresh = () => {
+    if (!userId) return
+
+    toast.success("Checking DNS resolution...", {
+      style: {
+        borderRadius: "10px",
+        background: "rgba(50, 140, 90, 0.9)",
+        color: "#fff",
+        backdropFilter: "blur(10px)",
+      },
+    })
+
+    // Fetch website data again
+    const fetchWebsite = async () => {
+      try {
+        const response = await axios.get(`/api/user/get-websites?userId=${userId}`)
+        const websites = response?.data?.websites || []
+        const foundWebsite: Website = websites.find((site: Website) => site.id.toString() === websiteId.toString())
+
+        if (foundWebsite) {
+          setWebsite(foundWebsite)
+          setIsDNSResolved(foundWebsite.isDNSResolved)
+          setLastCheckedAt(foundWebsite.lastCheckedAt)
+
+          if (foundWebsite.isDNSResolved) {
+            toast.success("DNS resolution successful!", {
+              style: {
+                borderRadius: "10px",
+                background: "rgba(50, 140, 90, 0.9)",
+                color: "#fff",
+                backdropFilter: "blur(10px)",
+              },
+            })
+            fetchStats(true)
+          } else {
+            toast.error("DNS resolution still failing", {
+              style: {
+                borderRadius: "10px",
+                background: "rgba(170, 50, 60, 0.9)",
+                color: "#fff",
+                backdropFilter: "blur(10px)",
+              },
+            })
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch website:", error)
+      }
+    }
+
+    fetchWebsite()
+  }
+
+  // Render the DNS error screen when DNS is not resolved
+  if (!isDNSResolved && website) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0B]">
+        <div className="border-b border-zinc-800 bg-[#111113] sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-3 flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-md font-medium">
+                <Link
+                  href="/dashboard"
+                  className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors"
+                >
+                  <Globe className="w-4 h-4" />
+                  Monitors
+                </Link>
+                <ChevronRight className="w-4 h-4 text-zinc-600" />
+                <span className="text-white truncate max-w-[200px] md:max-w-md">
+                  {website?.url?.replace(/(^\w+:|^)\/\//, "") || `Monitor ${websiteId}`}
+                </span>
+
+                <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-400 border-red-500/20">
+                  DNS Error
+                </Badge>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {website && (
+                  <>
+                    <Button
+                      size="sm"
+                      className={`${
+                        website.isPaused
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          : "bg-amber-600 hover:bg-amber-700 text-white"
+                      }`}
+                      onClick={handleToggleMonitor}
+                    >
+                      {website.isPaused ? (
+                        <>
+                          <Play className="h-4 w-4 mr-2" />
+                          Resume Monitor
+                        </>
+                      ) : (
+                        <>
+                          <Pause className="h-4 w-4 mr-2" />
+                          Pause Monitor
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+                      onClick={() => setDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Monitor
+                    </Button>
+
+                    {website.url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800"
+                        onClick={() => window.open(website.url, "_blank")}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Visit
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="bg-red-500/10 p-4 rounded-full mb-6">
+              <ServerCrash className="h-16 w-16 text-red-400" />
+            </div>
+
+            <h1 className="text-3xl font-bold text-white mb-4">DNS Resolution Failed</h1>
+
+            <div className="max-w-3xl mb-8">
+              <p className="text-zinc-300 text-lg mb-4">
+                We're unable to resolve the DNS for your website{" "}
+                <span className="font-semibold text-red-300">{website?.url?.replace(/(^\w+:|^)\/\//, "")}</span>
+              </p>
+              <p className="text-zinc-400 mb-6">
+                This means your website might be inaccessible to visitors. We'll continue monitoring and notify you once
+                the website is back up.
+              </p>
+
+              <div className="bg-[#111113] border border-zinc-800 rounded-lg p-6 mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold text-white flex items-center">
+                    <AlertTriangle className="h-5 w-5 text-amber-400 mr-2" />
+                    Last checked {lastCheckedAt ? formatRelativeTime(lastCheckedAt) : "Never"}
+                  </h2>
+                  <button
+                    onClick={handleManualRefresh}
+                    className="flex items-center bg-green-900 text-zinc-300 px-3 py-2 rounded-md transition-colors"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Check Again
+                  </button>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
+                    <h3 className="text-zinc-300 font-medium mb-2 flex items-center">
+                      <LinkIcon className="h-4 w-4 text-red-400 mr-2" />
+                      Possible Causes
+                    </h3>
+                    <ul className="text-zinc-400 text-sm space-y-2">
+                      <li>• Domain name not registered or expired</li>
+                      <li>• DNS records misconfigured</li>
+                      <li>• DNS propagation in progress</li>
+                      <li>• DNS provider issues</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
+                    <h3 className="text-zinc-300 font-medium mb-2 flex items-center">
+                      <HelpCircle className="h-4 w-4 text-blue-400 mr-2" />
+                      Recommended Actions
+                    </h3>
+                    <ul className="text-zinc-400 text-sm space-y-2">
+                      <li>• Verify domain registration status</li>
+                      <li>• Check DNS configuration</li>
+                      <li>• Contact your DNS provider</li>
+                      <li>• Ensure nameservers are correctly set</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Error state for charts */}
+          <div className="grid grid-cols-1 gap-6 mt-12">
+            <div className="bg-[#111113] rounded-lg p-4 border border-zinc-800/50">
+              <div className="flex items-center mb-3">
+                <div className="h-2 w-2 rounded-full bg-blue-400 mr-2"></div>
+                <h2 className="text-sm font-medium text-zinc-300">Response Time History</h2>
+              </div>
+              <div className="h-[300px] flex items-center justify-center text-zinc-500 bg-zinc-900/30 rounded-lg">
+                <div className="text-center">
+                  <AlertTriangle className="h-10 w-10 text-red-400 mx-auto mb-2" />
+                  <p className="text-red-300 font-medium">DNS Resolution Failed</p>
+                  <p className="text-sm text-zinc-400 max-w-md mt-2">
+                    Unable to collect response time data due to DNS resolution failure
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#111113] rounded-lg p-4 border border-zinc-800/50">
+              <div className="flex items-center mb-3">
+                <div className="h-2 w-2 rounded-full bg-green-400 mr-2"></div>
+                <h2 className="text-sm font-medium text-zinc-300">Status History</h2>
+              </div>
+              <div className="h-[300px] flex items-center justify-center text-zinc-500 bg-zinc-900/30 rounded-lg">
+                <div className="text-center">
+                  <AlertTriangle className="h-10 w-10 text-red-400 mx-auto mb-2" />
+                  <p className="text-red-300 font-medium">DNS Resolution Failed</p>
+                  <p className="text-sm text-zinc-400 max-w-md mt-2">
+                    Unable to collect status data due to DNS resolution failure
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {website && (
+          <>
+            <DeleteConfirmationModal
+              isOpen={deleteDialogOpen}
+              onClose={() => setDeleteDialogOpen(false)}
+              onConfirm={handleDeleteMonitor}
+              type="monitor"
+              itemName={website.url?.replace(/(^\w+:|^)\/\//, "") || ""}
+              isProcessing={deletingMonitor}
+            />
+
+            <PauseConfirmationModal
+              isOpen={pauseDialogOpen}
+              onClose={() => setPauseDialogOpen(false)}
+              onConfirm={confirmPause}
+              websiteUrl={website.url?.replace(/(^\w+:|^)\/\//, "") || ""}
+            />
+          </>
+        )}
+      </div>
+    )
+  }
+
+  // Regular stats view when DNS is resolved
   return (
     <div className="min-h-screen bg-[#0A0A0B]">
       {website && (
@@ -815,7 +1066,6 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
             </>
           )}
         </div>
-
       </div>
     </div>
   )
