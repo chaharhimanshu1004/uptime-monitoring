@@ -24,11 +24,13 @@ interface Incident {
     responseTime: number
     duration?: number | null
     isAcknowledged: boolean
-    region: string
     reason: string
+    region: string
     website: {
         url: string
     }
+    regions?: string[] // for grouped incidents
+    originalIncidents?: Incident[]
 }
 
 export default function IncidentsPage() {
@@ -52,7 +54,9 @@ export default function IncidentsPage() {
         try {
             setLoading(true)
             const response = await axios.get(`/api/incidents?status=${filter}`)
-            setIncidents(response?.data?.incidents)
+            // Group incidents by websiteId
+            const groupedIncidents = groupIncidentsByWebsite(response?.data?.incidents)
+            setIncidents(groupedIncidents)
         } catch (error) {
             console.error("Failed to fetch incidents:", error)
             toast.error("Failed to load incidents", {
@@ -67,6 +71,41 @@ export default function IncidentsPage() {
             setLoading(false)
         }
     }
+    // Function to group incidents by websiteId
+    const groupIncidentsByWebsite = (incidents: Incident[]): Incident[] => {
+        const groupedMap = new Map<number, Incident>()
+    
+        incidents.forEach((incident) => {
+            if (!groupedMap.has(incident.websiteId)) {
+                const modifiedIncident = {
+                    ...incident,
+                    regions: [incident.region],
+                    originalIncidents: [incident],
+                }
+                groupedMap.set(incident.websiteId, modifiedIncident)
+            } else {
+                const existingIncident = groupedMap.get(incident.websiteId)!
+                
+                existingIncident.regions = existingIncident.regions ? 
+                    [...existingIncident.regions, incident.region] : 
+                    [incident.region]
+                
+                existingIncident.originalIncidents = existingIncident.originalIncidents ? 
+                    [...existingIncident.originalIncidents, incident] : 
+                    [incident]
+    
+                if (new Date(incident.startTime) > new Date(existingIncident.startTime)) {
+                    existingIncident.startTime = incident.startTime
+                }
+    
+                if (!existingIncident.isResolved && incident.isResolved) {
+                    existingIncident.isResolved = false
+                }
+            }
+        })
+    
+        return Array.from(groupedMap.values())
+    }
 
     const handleRefresh = async () => {
         setRefreshing(true)
@@ -78,7 +117,25 @@ export default function IncidentsPage() {
         try {
             setProcessingIds((prev) => [...prev, incidentId])
 
-            const response = await axios.put("/api/incidents", { incidentId, websiteId })
+            // Find the incident
+            const incident = incidents.find((inc) => inc.id === incidentId)
+
+            // If it has original incidents, acknowledge all of them
+            if (incident?.originalIncidents?.length) {
+                // Create an array of promises for each original incident
+                const acknowledgePromises = incident.originalIncidents.map((originalIncident) =>
+                    axios.put("/api/incidents", {
+                        incidentId: originalIncident.id,
+                        websiteId,
+                    }),
+                )
+
+                // Wait for all acknowledgements to complete
+                await Promise.all(acknowledgePromises)
+            } else {
+                // Fall back to original behavior for single incidents
+                await axios.put("/api/incidents", { incidentId, websiteId })
+            }
 
             setIncidents((prev) =>
                 prev.map((incident) =>
@@ -113,7 +170,18 @@ export default function IncidentsPage() {
     }
 
     const openIncidentDetails = (incident: Incident) => {
-        setSelectedIncident(incident)
+        // If this is a grouped incident with original incidents, use the first one for details
+        // but add the regions information
+        if (incident.originalIncidents && incident.originalIncidents.length > 0) {
+            const detailIncident = {
+                ...incident.originalIncidents[0],
+                regions: incident.regions,
+                originalIncidents: incident.originalIncidents,
+            }
+            setSelectedIncident(detailIncident)
+        } else {
+            setSelectedIncident(incident)
+        }
         setModalOpen(true)
     }
 
@@ -275,8 +343,19 @@ export default function IncidentsPage() {
                                                     >
                                                         <div className="col-span-3">
                                                             <div className="flex flex-col">
-                                                                <div className="font-medium text-white truncate">
-                                                                    {incident.website.url.replace(/(^\w+:|^)\/\//, "")}
+                                                                <div className="font-medium text-white flex items-center gap-2">
+                                                                    <span className="truncate">
+                                                                        {incident.website.url.replace(/(^\w+:|^)\/\//, "")}
+                                                                    </span>
+                                                                    <Badge
+                                                                        className="bg-zinc-800 text-zinc-300 hover:bg-zinc-700 cursor-pointer h-5 px-1.5 flex items-center"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            window.open(incident.website.url, "_blank");
+                                                                        }}
+                                                                    >
+                                                                        <Globe className="h-3 w-3" />
+                                                                    </Badge>
                                                                 </div>
                                                                 <div className="text-xs text-zinc-500 mt-3 flex items-center">
                                                                     <Clock className="h-3 w-3 mr-1" />
@@ -310,17 +389,37 @@ export default function IncidentsPage() {
                                                         </div>
 
                                                         <div className="col-span-2 flex items-center">
-                                                            <div className="flex items-center text-zinc-300">
-                                                                <MapPin className="h-4 w-4 text-purple-400 mr-2" />
-                                                                <span className="capitalize">{incident.region}</span>
+                                                            <div className="flex flex-col gap-1">
+                                                                {incident.regions ? (
+                                                                    <div className="flex flex-col gap-1">
+                                                                        {incident.regions.map((region, idx) => (
+                                                                            <Badge
+                                                                                key={idx}
+                                                                                className="bg-purple-500/10 text-purple-400 border-purple-500/20 flex items-center gap-1 w-fit"
+                                                                            >
+                                                                                <MapPin className="h-3 w-3" />
+                                                                                <span className="capitalize">{region}</span>
+                                                                            </Badge>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex items-center text-zinc-300">
+                                                                        <MapPin className="h-4 w-4 text-purple-400 mr-2" />
+                                                                        <span className="capitalize">{incident.region}</span>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
 
                                                         <div className="col-span-2 flex items-center">
                                                             <div className="text-zinc-300">
-                                                                {formatDuration(incident.isResolved
-                                                                    ? incident.duration
-                                                                    : Math.floor((new Date().getTime() - new Date(incident.startTime).getTime()) / 1000))}
+                                                                {formatDuration(
+                                                                    incident.isResolved
+                                                                        ? incident.duration
+                                                                        : Math.floor(
+                                                                            (new Date().getTime() - new Date(incident.startTime).getTime()) / 1000,
+                                                                        ),
+                                                                )}
                                                             </div>
                                                         </div>
 
@@ -328,18 +427,6 @@ export default function IncidentsPage() {
                                                             className="col-span-3 flex justify-end items-center gap-2"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            <Button
-                                                                size="sm"
-                                                                variant="outline"
-                                                                className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    window.open(incident.website.url, "_blank")
-                                                                }}
-                                                            >
-                                                                <Globe className="h-3.5 w-3.5 mr-1" />
-                                                                Visit
-                                                            </Button>
 
                                                             {!incident.isResolved && (
                                                                 <Button
@@ -401,27 +488,47 @@ export default function IncidentsPage() {
                                     <MapPin className="h-5 w-5 text-purple-400" />
                                 </div>
                                 <div className="space-y-4">
-                                    {Array.from(new Set(incidents.map((i) => i.region))).map((region) => {
-                                        const count = incidents.filter((i) => i.region === region).length
-                                        const percentage = Math.round((count / incidents.length) * 100) || 0
+                                    {(() => {
+                                        const allRegions = new Set<string>()
+                                        const regionCounts: Record<string, number> = {}
 
-                                        return (
-                                            <div key={region} className="space-y-1">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-zinc-400 capitalize">{region}</span>
-                                                    <span className="text-sm font-medium text-white">
-                                                        {count} ({percentage}%)
-                                                    </span>
-                                                </div>
-                                                <div className="w-full bg-zinc-800/50 rounded-full h-1.5">
-                                                    <div
-                                                        className="bg-gradient-to-r from-purple-500 to-cyan-500 h-1.5 rounded-full"
-                                                        style={{ width: `${percentage}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
+                                        incidents.forEach((incident) => {
+                                            if (incident.regions && incident.regions.length > 0) {
+                                                incident.regions.forEach((region) => {
+                                                    allRegions.add(region)
+                                                    regionCounts[region] = (regionCounts[region] || 0) + 1
+                                                })
+                                            } else if (incident.region) {
+                                                allRegions.add(incident.region)
+                                                regionCounts[incident.region] = (regionCounts[incident.region] || 0) + 1
+                                            }
+                                        })
+
+                                        const totalRegionCount = Object.values(regionCounts).reduce((sum, count) => sum + count, 0)
+                                        return Array.from(allRegions)
+                                            .sort((a, b) => regionCounts[b] - regionCounts[a])
+                                            .map((region) => {
+                                                const count = regionCounts[region]
+                                                const percentage = Math.round((count / totalRegionCount) * 100) || 0
+
+                                                return (
+                                                    <div key={region} className="space-y-1">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-zinc-400 capitalize">{region}</span>
+                                                            <span className="text-sm font-medium text-white">
+                                                                {count} ({percentage}%)
+                                                            </span>
+                                                        </div>
+                                                        <div className="w-full bg-zinc-800/50 rounded-full h-1.5">
+                                                            <div
+                                                                className="bg-gradient-to-r from-purple-500 to-cyan-500 h-1.5 rounded-full"
+                                                                style={{ width: `${percentage}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })
+                                    })()}
                                 </div>
                             </div>
 
