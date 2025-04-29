@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import axios from "axios"
 import toast from "react-hot-toast"
 import { IncidentDetailsModal } from "@/app/components/IncidentDetailsModal"
+import { AcknowledgeConfirmationModal } from "@/app/components/AcknowledgeConfirmationModal"
 
 interface Incident {
     id: string
@@ -44,7 +45,13 @@ export default function IncidentsPage() {
     const [processingIds, setProcessingIds] = useState<string[]>([])
     const [refreshing, setRefreshing] = useState(false)
     const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
-    const [modalOpen, setModalOpen] = useState(false)
+    const [modalOpen, setModalOpen] = useState(false) // for incident details modal
+    const [acknowledgeModalOpen, setAcknowledgeModalOpen] = useState(false)
+    const [incidentToAcknowledge, setIncidentToAcknowledge] = useState<{
+        id: string
+        websiteId: number
+        url: string
+    } | null>(null)
 
     useEffect(() => {
         fetchIncidents()
@@ -113,7 +120,16 @@ export default function IncidentsPage() {
         setRefreshing(false)
     }
 
-    const handleAcknowledge = async (incidentId: string, websiteId: number) => {
+    const openAcknowledgeModal = (incidentId: string, websiteId: number, websiteUrl: string) => {
+        setIncidentToAcknowledge({ id: incidentId, websiteId, url: websiteUrl })
+        setAcknowledgeModalOpen(true)
+      }
+
+    const handleAcknowledge = async () => {
+
+        if (!incidentToAcknowledge) return
+        const { id: incidentId, websiteId } = incidentToAcknowledge
+
         try {
             setProcessingIds((prev) => [...prev, incidentId])
 
@@ -145,6 +161,9 @@ export default function IncidentsPage() {
             if (selectedIncident?.id === incidentId) {
                 setSelectedIncident((prev) => (prev ? { ...prev, isResolved: true, endTime: new Date() } : null))
             }
+
+            setAcknowledgeModalOpen(false)
+            setIncidentToAcknowledge(null)
 
             toast.success("Incident acknowledged", {
                 style: {
@@ -429,7 +448,8 @@ export default function IncidentsPage() {
                                                                     className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation()
-                                                                        handleAcknowledge(incident.id, incident.websiteId)
+                                                                        openAcknowledgeModal(incident.id, incident.websiteId, incident.website.url)
+
                                                                     }}
                                                                     disabled={processingIds.includes(incident.id)}
                                                                 >
@@ -568,6 +588,19 @@ export default function IncidentsPage() {
                 onAcknowledge={handleAcknowledge}
                 isProcessing={selectedIncident ? processingIds.includes(selectedIncident.id) : false}
             />
+
+            {incidentToAcknowledge && (
+                <AcknowledgeConfirmationModal
+                    isOpen={acknowledgeModalOpen}
+                    onClose={() => {
+                        setAcknowledgeModalOpen(false)
+                        setIncidentToAcknowledge(null)
+                    }}
+                    onConfirm={handleAcknowledge}
+                    isProcessing={incidentToAcknowledge ? processingIds.includes(incidentToAcknowledge.id) : false}
+                    websiteUrl={incidentToAcknowledge.url}
+                />
+            )}
         </motion.div>
     )
 }
