@@ -322,11 +322,11 @@ export default function IncidentsPage() {
                                 ) : (
                                     <div className="min-w-full divide-y divide-zinc-800/50">
                                         <div className="bg-zinc-900/30 text-xs uppercase tracking-wider text-zinc-500 grid grid-cols-12 gap-2 px-6 py-3">
-                                            <div className="col-span-3">Website</div>
-                                            <div className="col-span-2">Status</div>
-                                            <div className="col-span-2">Region</div>
-                                            <div className="col-span-2">Duration</div>
-                                            <div className="col-span-3 text-right">Actions</div>
+                                            <div className="col-span-3 text-center">Website</div>
+                                            <div className="col-span-2 text-center">Status</div>
+                                            <div className="col-span-3 text-center">Region</div>
+                                            <div className="col-span-1 text-center">Duration</div>
+                                            <div className="col-span-3 text-center">Actions</div>
                                         </div>
 
                                         <div className="divide-y divide-zinc-800/50 bg-[#111113]">
@@ -342,16 +342,14 @@ export default function IncidentsPage() {
                                                         onClick={() => openIncidentDetails(incident)}
                                                     >
                                                         <div className="col-span-3">
-                                                            <div className="flex flex-col">
+                                                            <div className="flex flex-col items-center">
                                                                 <div className="font-medium text-white flex items-center gap-2">
-                                                                    <span className="truncate">
-                                                                        {incident.website.url.replace(/(^\w+:|^)\/\//, "")}
-                                                                    </span>
+                                                                    <span className="truncate">{incident.website.url.replace(/(^\w+:|^)\/\//, "")}</span>
                                                                     <Badge
                                                                         className="bg-zinc-800 text-zinc-300 hover:bg-zinc-700 cursor-pointer h-5 px-1.5 flex items-center"
                                                                         onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            window.open(incident.website.url, "_blank");
+                                                                            e.stopPropagation()
+                                                                            window.open(incident.website.url, "_blank")
                                                                         }}
                                                                     >
                                                                         <Globe className="h-3 w-3" />
@@ -362,14 +360,12 @@ export default function IncidentsPage() {
                                                                     {formatDate(incident.startTime)}
                                                                 </div>
                                                                 <div className="mt-2">
-                                                                    <Badge className={getReasonBadgeColor(incident.reason)}>
-                                                                        {incident.reason}
-                                                                    </Badge>
+                                                                    <Badge className={getReasonBadgeColor(incident.reason)}>{incident.reason}</Badge>
                                                                 </div>
                                                             </div>
                                                         </div>
 
-                                                        <div className="col-span-2 flex items-center">
+                                                        <div className="col-span-2 flex items-center justify-center">
                                                             {incident.isAcknowledged ? (
                                                                 <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 flex items-center gap-1">
                                                                     <CheckCircle className="h-3 w-3" />
@@ -388,10 +384,10 @@ export default function IncidentsPage() {
                                                             )}
                                                         </div>
 
-                                                        <div className="col-span-2 flex items-center">
-                                                            <div className="flex flex-col gap-1">
+                                                        <div className="col-span-3 flex items-center justify-center">
+                                                            <div className="flex flex-wrap gap-2 justify-center">
                                                                 {incident.regions ? (
-                                                                    <div className="flex flex-col gap-1">
+                                                                    <div className="flex flex-row gap-2">
                                                                         {incident.regions.map((region, idx) => (
                                                                             <Badge
                                                                                 key={idx}
@@ -411,7 +407,7 @@ export default function IncidentsPage() {
                                                             </div>
                                                         </div>
 
-                                                        <div className="col-span-2 flex items-center">
+                                                        <div className="col-span-1 flex items-center justify-center">
                                                             <div className="text-zinc-300">
                                                                 {formatDuration(
                                                                     incident.isResolved
@@ -424,10 +420,9 @@ export default function IncidentsPage() {
                                                         </div>
 
                                                         <div
-                                                            className="col-span-3 flex justify-end items-center gap-2"
+                                                            className="col-span-3 flex justify-center items-center gap-2"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-
                                                             {!incident.isResolved && (
                                                                 <Button
                                                                     size="sm"
