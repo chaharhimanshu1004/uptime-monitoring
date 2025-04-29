@@ -23,6 +23,7 @@ interface Incident {
     isResolved: boolean
     responseTime: number
     duration?: number | null
+    isAcknowledged: boolean
     region: string
     reason: string
     website: {
@@ -50,7 +51,7 @@ export default function IncidentsPage() {
     const fetchIncidents = async () => {
         try {
             setLoading(true)
-            const response = await axios.get(`/api/get-incidents?status=${filter}`)
+            const response = await axios.get(`/api/incidents?status=${filter}`)
             setIncidents(response?.data?.incidents)
         } catch (error) {
             console.error("Failed to fetch incidents:", error)
@@ -67,19 +68,17 @@ export default function IncidentsPage() {
         }
     }
 
-    console.log('>>incidents', incidents)
-
     const handleRefresh = async () => {
         setRefreshing(true)
         await fetchIncidents()
         setRefreshing(false)
     }
 
-    const handleAcknowledge = async (incidentId: string) => {
+    const handleAcknowledge = async (incidentId: string, websiteId: number) => {
         try {
             setProcessingIds((prev) => [...prev, incidentId])
 
-            await axios.put("/api/incidents", { incidentId })
+            const response = await axios.put("/api/incidents", { incidentId, websiteId })
 
             setIncidents((prev) =>
                 prev.map((incident) =>
@@ -292,7 +291,12 @@ export default function IncidentsPage() {
                                                         </div>
 
                                                         <div className="col-span-2 flex items-center">
-                                                            {incident.isResolved ? (
+                                                            {incident.isAcknowledged ? (
+                                                                <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 flex items-center gap-1">
+                                                                    <CheckCircle className="h-3 w-3" />
+                                                                    Acknowledged
+                                                                </Badge>
+                                                            ) : incident.isResolved ? (
                                                                 <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1">
                                                                     <CheckCircle className="h-3 w-3" />
                                                                     Resolved
@@ -343,7 +347,7 @@ export default function IncidentsPage() {
                                                                     className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation()
-                                                                        handleAcknowledge(incident.id)
+                                                                        handleAcknowledge(incident.id, incident.websiteId)
                                                                     }}
                                                                     disabled={processingIds.includes(incident.id)}
                                                                 >

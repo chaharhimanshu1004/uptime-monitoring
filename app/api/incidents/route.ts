@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authoptions } from "@/app/api/auth/[...nextauth]/options"
+import { acknowledgeWebsite } from "@/lib/queue"
 
 export async function GET(request: Request) {
     try {
@@ -54,7 +55,7 @@ export async function PUT(request: Request) {
         }
 
         const body = await request.json()
-        const { incidentId } = body
+        const { incidentId, websiteId } = body
 
         if (!incidentId) {
             return NextResponse.json({ error: "Incident ID is required" }, { status: 400 })
@@ -65,11 +66,11 @@ export async function PUT(request: Request) {
                 id: incidentId,
             },
             data: {
-                isResolved: true,
-                endTime: new Date(),
+                isAcknowledged: true,
             },
         })
 
+        await acknowledgeWebsite(websiteId)
         return NextResponse.json({ success: true, incident: updatedIncident })
     } catch (error) {
         console.error("Error acknowledging incident:", error)

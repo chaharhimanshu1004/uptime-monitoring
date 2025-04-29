@@ -23,7 +23,7 @@ interface IncidentDetailsModalProps {
   incident: Incident | null
   isOpen: boolean
   onClose: () => void
-  onAcknowledge: (id: string) => void
+  onAcknowledge: (id: string, websiteId: number) => void
   isProcessing: boolean
 }
 
@@ -185,7 +185,7 @@ export function IncidentDetailsModal({
                 {!incident.isResolved && (
                   <Button
                     className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white"
-                    onClick={() => onAcknowledge(incident.id)}
+                    onClick={() => onAcknowledge(incident.id, incident.websiteId)}
                     disabled={isProcessing}
                   >
                     {isProcessing ? (
