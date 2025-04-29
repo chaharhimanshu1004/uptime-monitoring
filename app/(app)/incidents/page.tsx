@@ -278,7 +278,7 @@ export default function IncidentsPage() {
                                                                 <div className="font-medium text-white truncate">
                                                                     {incident.website.url.replace(/(^\w+:|^)\/\//, "")}
                                                                 </div>
-                                                                <div className="text-xs text-zinc-500 mt-1 flex items-center">
+                                                                <div className="text-xs text-zinc-500 mt-3 flex items-center">
                                                                     <Clock className="h-3 w-3 mr-1" />
                                                                     {formatDate(incident.startTime)}
                                                                 </div>

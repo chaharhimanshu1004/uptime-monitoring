@@ -10,6 +10,7 @@ interface Incident {
   startTime: string | Date
   endTime?: string | Date | null
   isResolved: boolean
+  isAcknowledged: boolean
   responseTime: number
   duration?: number | null
   region: string
@@ -78,9 +79,13 @@ export function IncidentDetailsModal({
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center">
-                  {incident.isResolved ? (
+                  {incident.isAcknowledged ? (
+                    <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center mr-4">
+                      <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                    </div>
+                  ) : incident.isResolved ? (
                     <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center mr-4">
-                      <CheckCircle className="h-5 w-5 text-emerald-400" />
+                      <CheckCircle className="h-5 w-5 text-emaraled-400" />
                     </div>
                   ) : (
                     <div className="h-10 w-10 rounded-full bg-red-500/10 flex items-center justify-center mr-4">
@@ -107,17 +112,22 @@ export function IncidentDetailsModal({
                   <div>
                     <div className="text-sm text-zinc-500 mb-1">Status</div>
                     <div>
-                      {incident.isResolved ? (
-                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          Resolved
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-red-500/10 text-red-400 border-red-500/20 flex items-center gap-1">
-                          <XCircle className="h-3 w-3" />
-                          Unresolved
-                        </Badge>
-                      )}
+                    {incident.isAcknowledged ? (
+                    <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Acknowledged
+                    </Badge>
+                  ) : incident.isResolved ? (
+                    <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Resolved
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-red-500/10 text-red-400 border-red-500/20 flex items-center gap-1">
+                      <XCircle className="h-3 w-3" />
+                      Unresolved
+                    </Badge>
+                  )}
                     </div>
                   </div>
 
