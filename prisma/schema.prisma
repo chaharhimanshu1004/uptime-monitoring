@@ -67,6 +67,8 @@ model Incident {
   isResolved     Boolean   @default(false)
   responseTime   Int       @default(0)
   duration       Int?     
+  region         String 
+  reason         String
   website        Website   @relation(fields: [websiteId], references: [id], onDelete: Cascade)
   
   @@index([websiteId, startTime])
