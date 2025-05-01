@@ -171,11 +171,17 @@ export default function CreateMonitor() {
                     type="url"
                     value={websiteUrl}
                     onChange={(e) => {
-                      setWebsiteUrl(e.target.value)
+                      setWebsiteUrl(e.target.value);
                       setUrlError("");
                     }}
-                    
-                    className="w-full  bg-black/50 border-zinc-800 pl-[83px] text-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-purple-500/50"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        console.log("Enter key pressed in input");
+                        e.preventDefault();
+                        handleSubmit();
+                      }
+                    }}
+                    className="w-full bg-black/50 border-zinc-800 pl-[83px] text-white focus:ring-0 focus:ring-offset-0 focus-visible:ring-purple-500/50"
                     placeholder=" example.com"
                   />
                   <div className="absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none border-r border-zinc-800">
@@ -196,14 +202,19 @@ export default function CreateMonitor() {
                   .
                 </p>
               </div>
-
               <div className="pt-4">
-                <Button
-                  onClick={handleSubmit}
-                  className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white hover:opacity-90 transition-opacity"
-                >
-                  Create Monitor
-                </Button>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  console.log("Form submitted by Enter key!");
+                  handleSubmit();
+                }}>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white hover:opacity-90 transition-opacity"
+                  >
+                    Create Monitor
+                  </Button>
+                </form>
               </div>
             </div>
           </div>
