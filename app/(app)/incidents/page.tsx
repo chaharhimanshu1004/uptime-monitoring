@@ -443,13 +443,17 @@ export default function IncidentsPage() {
                                                             {!incident.isResolved && (
                                                                 <Button
                                                                     size="sm"
-                                                                    className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white"
+                                                                    className={`bg-gradient-to-r ${incident.isAcknowledged
+                                                                            ? "from-gray-600 to-gray-500 opacity-70"
+                                                                            : "from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600"
+                                                                        } text-white`}
                                                                     onClick={(e) => {
                                                                         e.stopPropagation()
-                                                                        openAcknowledgeModal(incident.id, incident.websiteId, incident.website.url)
-
+                                                                        if (!incident.isAcknowledged) {
+                                                                            openAcknowledgeModal(incident.id, incident.websiteId, incident.website.url)
+                                                                        }
                                                                     }}
-                                                                    disabled={processingIds.includes(incident.id)}
+                                                                    disabled={processingIds.includes(incident.id) || incident.isAcknowledged}
                                                                 >
                                                                     {processingIds.includes(incident.id) ? (
                                                                         <div className="h-3.5 w-3.5 border-t-2 border-r-2 border-white rounded-full animate-spin mr-1"></div>
