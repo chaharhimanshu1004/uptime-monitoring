@@ -154,12 +154,10 @@ export default function IncidentsPage() {
             }
 
             setIncidents((prev) =>
-                prev.map((incident) =>
-                    incident.id === incidentId ? { ...incident, isResolved: true, endTime: new Date() } : incident,
-                ),
+                prev.map((incident) => (incident.id === incidentId ? { ...incident, isAcknowledged: true } : incident)),
             )
             if (selectedIncident?.id === incidentId) {
-                setSelectedIncident((prev) => (prev ? { ...prev, isResolved: true, endTime: new Date() } : null))
+                setSelectedIncident((prev) => (prev ? { ...prev, isAcknowledged: true } : null))
             }
 
             setAcknowledgeModalOpen(false)
