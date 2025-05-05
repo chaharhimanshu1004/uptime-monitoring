@@ -70,8 +70,17 @@ export async function PUT(request: Request) {
             },
         })
 
+        const websiteUpdated = await prisma.website.update({
+            where: {
+                id: websiteId,
+            },
+            data: {
+                isAcknowledged: true,
+            },
+        }) 
+
         await acknowledgeWebsite(websiteId)
-        return NextResponse.json({ success: true, incident: updatedIncident })
+        return NextResponse.json({ success: true, incident: updatedIncident, website: websiteUpdated })
     } catch (error) {
         console.error("Error acknowledging incident:", error)
         return NextResponse.json({ error: "Failed to acknowledge incident" }, { status: 500 })

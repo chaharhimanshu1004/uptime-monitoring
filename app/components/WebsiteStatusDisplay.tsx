@@ -30,6 +30,7 @@ interface Website {
   lastDownAt?: Date | string | null
   lastUpAt?: Date | string | null 
   incidentCount?: number
+  isAcknowledged: boolean
   incidents?: Incident[]
 }
 
@@ -477,6 +478,12 @@ export function WebsiteStatusDisplay() {
                           className='relative inline-flex w-2 h-2 rounded-full bg-cyan-400'
                         ></span>
                       </>
+                    ) : website.isAcknowledged ? (
+                      <>
+                        <span
+                          className='relative inline-flex w-2 h-2 rounded-full bg-yellow-500'
+                        ></span>
+                      </>
                     ) : (
                       <>
                         <span
@@ -499,6 +506,7 @@ export function WebsiteStatusDisplay() {
                         <span className="text-yellow-400">Paused</span>
                       ) : website?.isChecking ? (
                         <span className="text-cyan-500">Checking...</span>
+                        ) : website?.isAcknowledged == true ? (<span className="text-yellow-500">Acknowledged</span>
                       ) : website?.isDNSResolved === false ? (
                         <span className="text-red-400">DNS not resolved</span>
                       ) : website?.isUp ? (
