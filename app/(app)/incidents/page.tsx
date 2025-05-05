@@ -52,10 +52,11 @@ export default function IncidentsPage() {
         websiteId: number
         url: string
     } | null>(null)
+    const [acknowledgeCounter, setAcknowledgeCounter] = useState(0)
 
     useEffect(() => {
         fetchIncidents()
-    }, [filter])
+    }, [filter, acknowledgeCounter]) // bcz incident detail modal shows outdated data
 
     const fetchIncidents = async () => {
         try {
@@ -125,13 +126,20 @@ export default function IncidentsPage() {
         setAcknowledgeModalOpen(true)
       }
 
-    const handleAcknowledge = async () => {
-
-        if (!incidentToAcknowledge) return
-        const { id: incidentId, websiteId } = incidentToAcknowledge
-
+    const handleAcknowledge = async (ackIncidentId: string | null, ackWebsiteId: number | null) => {
+        // When called from modal, use the direct parameters
+        let incidentId = ackIncidentId;
+        let websiteId = ackWebsiteId;
+        
+        // When called from acknowledge confirmation modal, use the stored incident
+        if (!incidentId && !websiteId) {
+            if (!incidentToAcknowledge) return;
+            incidentId = incidentToAcknowledge.id;
+            websiteId = incidentToAcknowledge.websiteId;
+        }
+        
         try {
-            setProcessingIds((prev) => [...prev, incidentId])
+            setProcessingIds((prev) => [...prev, incidentId!]);
 
             // Find the incident
             const incident = incidents.find((inc) => inc.id === incidentId)
@@ -162,6 +170,8 @@ export default function IncidentsPage() {
 
             setAcknowledgeModalOpen(false)
             setIncidentToAcknowledge(null)
+            
+            setAcknowledgeCounter(prev => prev + 1)
 
             toast.success("Incident acknowledged", {
                 style: {
@@ -598,7 +608,7 @@ export default function IncidentsPage() {
                         setAcknowledgeModalOpen(false)
                         setIncidentToAcknowledge(null)
                     }}
-                    onConfirm={handleAcknowledge}
+                    onConfirm={() => handleAcknowledge(null, null)}
                     isProcessing={incidentToAcknowledge ? processingIds.includes(incidentToAcknowledge.id) : false}
                     websiteUrl={incidentToAcknowledge.url}
                 />

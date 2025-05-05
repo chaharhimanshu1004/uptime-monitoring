@@ -169,7 +169,13 @@ export function IncidentDetailsModal({
                     <div className="text-sm text-zinc-500 mb-1">Duration</div>
                     <div className="flex items-center text-zinc-300">
                       <Clock className="h-4 w-4 text-amber-400 mr-2" />
-                      <span>{formatDuration(incident.duration)}</span>
+                      <span>{formatDuration(
+                        incident.isResolved
+                          ? incident.duration
+                          : Math.floor(
+                            (new Date().getTime() - new Date(incident.startTime).getTime()) / 1000,
+                          ),
+                      )}</span>
                     </div>
                   </div>
                 </div>
@@ -192,7 +198,7 @@ export function IncidentDetailsModal({
                   Visit Website
                 </Button>
 
-                {!incident.isResolved && (
+                {!incident.isResolved && !incident.isAcknowledged && (
                   <Button
                     className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white"
                     onClick={() => onAcknowledge(incident.id, incident.websiteId)}
