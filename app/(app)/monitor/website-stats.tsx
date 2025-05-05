@@ -909,7 +909,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                   <Clock className="h-4 w-4 text-blue-400" />
                 </div>
                 <div className="text-lg font-bold text-blue-400 mt-1 truncate">
-                  {lastCheckedAt ? formatRelativeTime(lastCheckedAt) : "Never"}
+                  {lastCheckedAt ? formatRelativeTime(lastCheckedAt) : "checking..."}
                 </div>
               </div>
             </div>

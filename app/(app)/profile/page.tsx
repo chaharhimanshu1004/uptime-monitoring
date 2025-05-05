@@ -81,7 +81,7 @@ const ProfileDashboard = () => {
                   <div className="text-2xl font-semibold text-white">{websites.length}</div>
                 </div>
                 <div className="bg-zinc-900/40 rounded-lg border border-zinc-800/50 p-4">
-                  <div className="text-sm text-zinc-400 mb-1">Websites Up</div>
+                  <div className="text-sm text-zinc-400 mb-1">Currently Monitoring</div>
                   <div className="text-2xl font-semibold text-green-400">
                     {websites.filter((site) => !site.isPaused).length}
                   </div>
