@@ -154,14 +154,20 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   const filteredStats = region === "asia" ? stats : stats.filter((s) => s.region === region)
 
   const uptime =
-    filteredStats.length > 0 ? ((filteredStats?.filter((s) => s.status === "up").length / filteredStats?.length) * 100).toFixed(2) : "0"
+    filteredStats.length > 0
+      ? ((filteredStats?.filter((s) => s.status === "up").length / filteredStats?.length) * 100).toFixed(2)
+      : "0"
 
   const avgResponseTime =
-    filteredStats.length > 0 ? (filteredStats?.reduce((acc, s) => acc + s.responseTime, 0) / filteredStats?.length).toFixed(2) : "0"
+    filteredStats.length > 0
+      ? (filteredStats?.reduce((acc, s) => acc + s.responseTime, 0) / filteredStats?.length).toFixed(2)
+      : "0"
 
-  const minResponseTime = filteredStats?.length > 0 ? Math.min(...filteredStats?.map((s) => s.responseTime)).toFixed(2) : "0"
+  const minResponseTime =
+    filteredStats?.length > 0 ? Math.min(...filteredStats?.map((s) => s.responseTime)).toFixed(2) : "0"
 
-  const maxResponseTime = filteredStats?.length > 0 ? Math.max(...filteredStats?.map((s) => s.responseTime)).toFixed(2) : "0"
+  const maxResponseTime =
+    filteredStats?.length > 0 ? Math.max(...filteredStats?.map((s) => s.responseTime)).toFixed(2) : "0"
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -328,19 +334,18 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
   }
 
   const handleSendTestAlert = async () => {
-    if (!website) return;
-    if (!user) return;
+    if (!website) return
+    if (!user) return
 
     setSendingTestAlert(true)
     try {
-
-      const userEmail = user?.email;
-      const websiteUrl = website?.url;
+      const userEmail = user?.email
+      const websiteUrl = website?.url
 
       const response = await axios.post("/api/user/send-alert", {
         websiteUrl,
         userEmail,
-      });
+      })
 
       if (response.data.success) {
         return toast.success("Test alert sent successfully", {
@@ -350,8 +355,8 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
             color: "#fff",
             backdropFilter: "blur(10px)",
           },
-        });
-      } 
+        })
+      }
       return toast.error("Failed to send test alert", {
         style: {
           borderRadius: "10px",
@@ -359,8 +364,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
           color: "#fff",
           backdropFilter: "blur(10px)",
         },
-      });
-      
+      })
     } catch (error) {
       console.error("Error sending test alert:", error)
 
@@ -514,7 +518,18 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
               <ServerCrash className="h-16 w-16 text-red-400" />
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-4">DNS Resolution Failed</h1>
+            <h1 className="text-3xl font-bold text-white mb-4">
+              DNS Resolution Failed
+              <Button
+                variant="ghost"
+                size="lg"
+                className="ml-4 h-8 px-4 font-bold py-0 text-sm bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 text-red-400 border border-red-500/30 rounded-full shadow-sm hover:shadow-red-500/10 transition-all duration-200"
+                onClick={() => router.push(`/incidents`)}
+              >
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                View Incident
+              </Button>
+            </h1>
 
             <div className="max-w-3xl mb-8">
               <p className="text-zinc-300 text-lg mb-4">
@@ -916,8 +931,6 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
           </div>
         )}
 
-        
-
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
           {loading ? (
             Array(2)
@@ -1070,4 +1083,3 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
     </div>
   )
 }
-

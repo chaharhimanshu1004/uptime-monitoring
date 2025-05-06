@@ -524,7 +524,7 @@ export function WebsiteStatusDisplay() {
                           className="h-7 px-3 py-0 text-xs bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 text-red-400 border border-red-500/30 rounded-full shadow-sm hover:shadow-red-500/10 transition-all duration-200"
                           onClick={(e) => {
                             e.stopPropagation()
-                            router.push(`/incidents?websiteId=${website.id}`)
+                            router.push(`/incidents`)
                           }}
                         >
                           <AlertCircle className="h-3 w-3 mr-1" />
