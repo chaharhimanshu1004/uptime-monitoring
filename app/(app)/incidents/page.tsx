@@ -247,7 +247,7 @@ export default function IncidentsPage() {
     function getReasonBadgeColor(reason: string): string {
         const reasonLower = reason.toLowerCase()
         if (reasonLower.includes("down")) {
-            return "bg-blue-500/20 text-blue-400 border-blue-500/30"
+            return "bg-red-500/20 text-red-400 border-red-500/30"
         } else if (reasonLower.includes("dns")) {
             return "bg-orange-500/20 text-orange-400 border-orange-500/30"
         } else {
