@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authoptions } from "@/app/api/auth/[...nextauth]/options"
 import { acknowledgeWebsite } from "@/lib/queue"
+import { sendAcknowledgmentEmail } from "@/helpers/sendAcknowledgementEmail"
 
 export async function GET(request: Request) {
     try {
@@ -54,6 +55,8 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
+        const userEmail = session.user.email || "";
+
         const body = await request.json()
         const { incidentId, websiteId } = body
 
@@ -79,7 +82,8 @@ export async function PUT(request: Request) {
             },
         }) 
 
-        await acknowledgeWebsite(websiteId)
+        await acknowledgeWebsite(websiteId);
+        await sendAcknowledgmentEmail(websiteUpdated.url, userEmail);
         return NextResponse.json({ success: true, incident: updatedIncident, website: websiteUpdated })
     } catch (error) {
         console.error("Error acknowledging incident:", error)
