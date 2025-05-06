@@ -100,6 +100,7 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
               backdropFilter: "blur(10px)",
             },
           })
+          router.push("/dashboard")
         }
       } catch (error) {
         console.error("Failed to fetch website:", error)
