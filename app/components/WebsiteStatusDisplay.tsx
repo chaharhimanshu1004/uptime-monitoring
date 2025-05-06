@@ -517,7 +517,6 @@ export function WebsiteStatusDisplay() {
                     {/* View Incident button - only show for down/DNS not resolved sites that aren't acknowledged */}
                     {!website.isPaused &&
                       !website.isChecking &&
-                      !website.isAcknowledged &&
                       (!website.isUp || !website.isDNSResolved) && (
                         <Button
                           variant="ghost"
