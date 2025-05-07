@@ -22,22 +22,17 @@ export const authoptions: NextAuthOptions = {
                             email: credentials.email
                         }
                     });
+
                     if(!user){
                         throw new Error('No user found with the corresponding email');
-                    }
+                    }     
 
-                    if(!user.isVerified){
-                        throw new Error('Please verify your account first before login!');
-                    }
-                    
                     const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
                     if(!isPasswordCorrect){
                         throw new Error('Invalid Password!');
                     }
 
                     return user;
-
-
                 }catch(error:any){
                     console.log(error);
                     throw new Error('Invalid credentials',error);
@@ -89,8 +84,13 @@ export const authoptions: NextAuthOptions = {
             // yes payload size will be bigger but its okay when we dont need to fetch the user everytime
             // same for session, put everything there, and whenever we have the session access or token access, we can fetch the data whenever we feel
 
-            if (trigger === 'update' && session?.user?.name) { // for update name or details , updating the session
-                token.name = session.user.name;
+            if (trigger === 'update') { // for update name or isVerified , updating the session
+                if (session?.user?.name) {
+                    token.name = session.user.name;
+                }
+                if (session?.user?.isVerified !== undefined) {
+                    token.isVerified = session.user.isVerified;
+                }
             }
             else if (user) {
                 token.id = user.id?.toString();
