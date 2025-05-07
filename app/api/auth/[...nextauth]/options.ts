@@ -89,7 +89,7 @@ export const authoptions: NextAuthOptions = {
             // yes payload size will be bigger but its okay when we dont need to fetch the user everytime
             // same for session, put everything there, and whenever we have the session access or token access, we can fetch the data whenever we feel
 
-            if (trigger === 'update' && session?.user?.name) {
+            if (trigger === 'update' && session?.user?.name) { // for update name or details , updating the session
                 token.name = session.user.name;
             }
             else if (user) {
