@@ -46,6 +46,11 @@ export default function SignupPage() {
         setError(data.error || "Something went wrong.");
         return;
       }
+      await signIn("credentials", {
+        redirect: false,
+        email: email,
+        password: password
+      });
       router.push(`/onboarding/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err) {
       console.log("Error occurred while signing you up!", err)
