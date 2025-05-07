@@ -76,7 +76,7 @@ export default function SignInPage() {
               <DialogTitle>Invalid Credentials</DialogTitle>
               <DialogDescription>
                 Having trouble signing in? If you previously used Google to sign in with this email, try the "Sign in
-                with Google" option below instead.
+                with Google" option instead.
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
