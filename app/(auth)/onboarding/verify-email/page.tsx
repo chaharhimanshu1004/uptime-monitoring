@@ -10,11 +10,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import toast from "react-hot-toast"
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const email = searchParams.get("email")
+  const { data: session, update } = useSession() // Add this line
 
   if (!email) {
     toast.error("Error in signing you up", {
@@ -109,6 +111,17 @@ export default function VerifyEmailPage() {
         setIsVerified(true)
         setMessage("Email verified successfully!")
         setError("")
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            isVerified: true
+          }
+        })
+
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 1500)
       } else {
         throw new Error("Verification failed")
       }
