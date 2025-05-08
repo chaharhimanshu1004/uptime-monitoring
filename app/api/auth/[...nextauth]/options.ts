@@ -57,6 +57,7 @@ export const authoptions: NextAuthOptions = {
                 if (existingUser) {
                     user.id = existingUser?.id.toString();
                     user.name = existingUser.name;
+                    user.isVerified = existingUser.isVerified;
                     return true;
                 } else {
                     try {
@@ -69,6 +70,7 @@ export const authoptions: NextAuthOptions = {
                             }
                         });
                         user.id = newUser?.id.toString();
+                        user.isVerified = true;
                         return true;
                     } catch (error) {
                         console.error("Error creating user from Google auth:", error);
