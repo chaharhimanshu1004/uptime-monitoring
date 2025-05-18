@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-
+import React, { Suspense } from "react"
 import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
@@ -12,23 +11,28 @@ import toast from "react-hot-toast"
 import { motion } from "framer-motion"
 import { useSession } from "next-auth/react"
 
-export default function VerifyEmailPage() {
+// Component that uses useSearchParams
+function VerifyEmailContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const email = searchParams.get("email")
-  const { data: session, update } = useSession() // Add this line
+  const { data: session, update } = useSession()
 
+  // Early return for invalid email
   if (!email) {
-    toast.error("Error in signing you up", {
-      style: {
-        borderRadius: "10px",
-        background: "rgba(170, 50, 60, 0.9)",
-        color: "#fff",
-        backdropFilter: "blur(10px)",
-      },
-    })
-    router.push('/');
-    return;
+    useEffect(() => {
+      toast.error("Error in signing you up", {
+        style: {
+          borderRadius: "10px",
+          background: "rgba(170, 50, 60, 0.9)",
+          color: "#fff",
+          backdropFilter: "blur(10px)",
+        },
+      })
+      router.push('/')
+    }, [])
+    
+    return null
   }
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
@@ -37,13 +41,13 @@ export default function VerifyEmailPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
 
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([])
 
   const setInputRef = (index: number) => {
     return (el: HTMLInputElement | null) => {
-      inputRefs.current[index] = el;
-    };
-  };
+      inputRefs.current[index] = el
+    }
+  }
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -225,5 +229,26 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Page component with Suspense boundary
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen text-white">
+        <div className="w-full max-w-md text-center">
+          <div className="inline-block p-3 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500">
+            <Gauge className="w-9 h-9 text-white" />
+          </div>
+          <h2 className="mt-4 text-3xl font-bold">Loading verification</h2>
+          <div className="mt-6 flex justify-center">
+            <div className="w-8 h-8 border-4 border-t-transparent border-purple-500 rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   )
 }
