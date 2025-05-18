@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const { email, code } = await request.json();
     if (!email || !code) {
-      return Response.json({
+      return NextResponse.json({
         success: false,
         message: "Please enter valid email and code",
       },
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: "No user found with the corresponding email",
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
     const isCodeValid = user.verificationCode && user.verificationCode == code;
     if (!isCodeValid) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: "Invalid code",
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return Response.json({
+    return NextResponse.json({
       success: true,
       message: "Email verified successfully",
     });
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     
   } catch (error: any) {
     console.log("Error verifying code", error);
-    return Response.json(
+    return NextResponse.json(
       {
         success: false,
         message: "Error verifying code",

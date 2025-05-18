@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authoptions } from "../../auth/[...nextauth]/options";
 import prisma from "@/lib/prisma";
 import { User } from "next-auth";
+import { NextResponse } from "next/server";
 import { pauseWebsiteMonitoring, resumeWebsiteMonitoring } from "@/lib/queue";
 
 export async function POST(request: Request) {
@@ -9,7 +10,7 @@ export async function POST(request: Request) {
     const user: User = session?.user as User;
     
     if (!session || !session.user) {
-        return Response.json({
+        return NextResponse.json({
             success: false,
             message: "You need to be logged in to modify monitors"
         }, { status: 401 });
@@ -20,14 +21,14 @@ export async function POST(request: Request) {
         const { websiteId, action } = body;
         
         if (!websiteId) {
-            return Response.json({ 
+            return NextResponse.json({ 
                 success: false, 
                 message: "Website ID is required" 
             }, { status: 400 });
         }
         
         if (!action || (action !== "pause" && action !== "resume")) {
-            return Response.json({ 
+            return NextResponse.json({ 
                 success: false, 
                 message: "Valid action (pause or resume) is required" 
             }, { status: 400 });
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
 
         const dbUserId = parseInt(user.id as string);
         if (isNaN(dbUserId)) {
-            return Response.json({ 
+            return NextResponse.json({ 
                 success: false, 
                 message: "Invalid user ID" 
             }, { status: 400 });
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
         });
         
         if (!website) {
-            return Response.json({ 
+            return NextResponse.json({ 
                 success: false, 
                 message: "Website not found or you don't have permission to modify it" 
             }, { status: 404 });
@@ -80,14 +81,14 @@ export async function POST(request: Request) {
             }
         }
 
-        return Response.json({ 
+        return NextResponse.json({ 
             success: true, 
             message: action === "pause" ? "Monitor paused successfully" : "Monitor resumed successfully",
             website: updatedWebsite
         }, { status: 200 });
     } catch (error: any) {
         console.error("Error toggling monitor:", error);
-        return Response.json({ 
+        return NextResponse.json({ 
             success: false, 
             message: error.message || "An error occurred while toggling the monitor" 
         }, { status: 500 });

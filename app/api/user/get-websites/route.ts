@@ -10,7 +10,7 @@ export async function GET(request:Request){
         const user: User = session?.user as User;
 
         if (!session || !session.user) {
-            return Response.json({
+            return NextResponse.json({
                 success: false,
                 message: "You need to be logged in to view websites"
             }, { status: 401 });
@@ -36,7 +36,7 @@ export async function GET(request:Request){
 
         // user can only request their own data
         if (dbUserId !== parseInt(user.id as string)) {
-            return Response.json({
+            return NextResponse.json({
                 success: false,
                 message: "You can only view your own websites"
             }, { status: 403 });
