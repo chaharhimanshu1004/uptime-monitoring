@@ -20,18 +20,18 @@ export async function GET(request:Request){
         const userId = searchParams.get("userId");
         
         if(!userId){
-            return {
+            return NextResponse.json({
                 success: false,
                 message: "User ID is required"
-            }
+            }, { status: 400 });
         }
         const dbUserId = parseInt(userId as string);
 
         if (isNaN(dbUserId)) {
-            return {
+            return NextResponse.json({
                 success: false,
                 message: "Invalid user ID"
-            }
+            }, { status: 400 });
         }
 
         // user can only request their own data
