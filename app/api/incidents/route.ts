@@ -5,6 +5,9 @@ import { authoptions } from "@/app/api/auth/[...nextauth]/options"
 import { acknowledgeWebsite } from "@/lib/queue"
 import { sendAcknowledgmentEmail } from "@/helpers/sendAcknowledgementEmail"
 
+
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
     try {
         const session = await getServerSession(authoptions)
