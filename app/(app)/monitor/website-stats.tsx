@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { Activity, ChevronRight, Clock, ExternalLink, Globe, Pause, Play, Trash2, ArrowUpRight, ArrowDownRight, Shield, Bell, AlertTriangle, ServerCrash, RefreshCw, HelpCircle, LinkIcon } from "lucide-react"
+import { Activity, ChevronRight, Clock, ExternalLink, Globe, Pause, Play, Trash2, ArrowUpRight, ArrowDownRight, Bell, AlertTriangle, ServerCrash, RefreshCw, HelpCircle, LinkIcon, } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
@@ -903,6 +903,16 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50">
                 <div className="flex items-center justify-between">
+                  <div className="text-sm text-zinc-400">Last Checked</div>
+                  <Clock className="h-4 w-4 text-blue-400" />
+                </div>
+                <div className="text-lg font-bold text-blue-400 mt-1 truncate">
+                  {lastCheckedAt ? formatRelativeTime(lastCheckedAt) : "checking..."}
+                </div>
+              </div>
+
+              <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50">
+                <div className="flex items-center justify-between">
                   <div className="text-sm text-zinc-400">Total Incidents</div>
                   <AlertTriangle className="h-4 w-4 text-orange-400" />
                 </div>
@@ -916,16 +926,6 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                 </div>
                 <div className="text-lg font-bold text-red-400 mt-1 truncate">
                   {website?.lastDownAt ? formatRelativeTime(website.lastDownAt) : "Never"}
-                </div>
-              </div>
-
-              <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-zinc-400">Last Checked</div>
-                  <Clock className="h-4 w-4 text-blue-400" />
-                </div>
-                <div className="text-lg font-bold text-blue-400 mt-1 truncate">
-                  {lastCheckedAt ? formatRelativeTime(lastCheckedAt) : "checking..."}
                 </div>
               </div>
             </div>
@@ -966,11 +966,14 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                     </SelectContent>
                   </Select>
                 </div>
-                {stats.length === 0 ? (
+                {filteredStats.length < 2 ? (
                   <div className="h-[400px] flex items-center justify-center text-zinc-500">
                     <div className="text-center">
-                      <Shield className="h-10 w-10 text-zinc-700 mx-auto mb-2" />
-                      <p className="text-sm">No data available for the selected period</p>
+                      <RefreshCw className="h-10 w-10 text-blue-400 mx-auto mb-2 animate-spin" />
+                      <p className="text-lg font-medium text-blue-400">We are building your graph</p>
+                      <p className="text-sm text-zinc-400 max-w-md mt-2">
+                        Collecting data points to generate meaningful charts. This may take a few minutes.
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -1021,11 +1024,14 @@ export default function WebsiteStats({ websiteId }: { websiteId: string }) {
                   <div className="h-2 w-2 rounded-full bg-green-400 mr-2"></div>
                   <h2 className="text-sm font-medium text-zinc-300">Status History</h2>
                 </div>
-                {stats.length === 0 ? (
+                {filteredStats.length < 2 ? (
                   <div className="h-[400px] flex items-center justify-center text-zinc-500">
                     <div className="text-center">
-                      <Shield className="h-10 w-10 text-zinc-700 mx-auto mb-2" />
-                      <p className="text-sm">No data available for the selected period</p>
+                      <RefreshCw className="h-10 w-10 text-blue-400 mx-auto mb-2 animate-spin" />
+                      <p className="text-lg font-medium text-blue-400">We are building your graph</p>
+                      <p className="text-sm text-zinc-400 max-w-md mt-2">
+                        Collecting data points to generate meaningful charts. This may take a few minutes.
+                      </p>
                     </div>
                   </div>
                 ) : (
