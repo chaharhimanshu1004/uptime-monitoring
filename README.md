@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📡 **Uptime Monitoring**
 
-## Getting Started
+> **Note:** Re-uploaded after deleting the original repository due to an accidental commit made using my company's laptop and email, which raised internal security concerns.
 
-First, run the development server:
+---
+
+## 📝 Overview
+
+**Uptime Monitoring** is a scalable web application designed to monitor the availability of registered websites in real-time. Users can onboard, add their websites, and receive alerts if any monitored site goes down.
+
+---
+
+## 🏗️ Architecture
+
+This project consists of **two servers** working in synchronization:
+
+1. **Next.js Server**  
+   - Handles user onboarding, authentication, website registration, and user interactions.  
+   - Acts as the frontend and API layer for user management and configuration.
+
+2. **Main Backend Server ( worker )**  
+   - Responsible for continuously checking the uptime status of registered websites.  
+   - Performs monitoring tasks and triggers alerts when downtime is detected. 
+
+![Project Screenshot](assets/architecture.png)
+
+
+You can find the backend repo here:  
+[https://github.com/chaharhimanshu1004/uptime-worker-backend](https://github.com/chaharhimanshu1004/uptime-worker-backend)
+
+---
+
+## ⚙️ Tech Stacks
+
+1. Next.js  
+2. NextAuth.js (for authentication)  
+3. Prisma ORM 
+4. Redis
+
+---
+
+## 📷 Project Snapshot
+
+![Project Screenshot](assets/home.png)
+![Project Screenshot](assets/dashboard.png)
+![Project Screenshot](assets/stats.png)
+![Project Screenshot](assets/incidents.png)
+
+---
+
+
+## 🚀 Getting Started
+
+To run the Next.js server locally:
 
 ```bash
+npm install
 npm run dev
 # or
+yarn install
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
