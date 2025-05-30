@@ -31,7 +31,7 @@ export default function CreateMonitor() {
       if (normalizedUrl.startsWith('http://')) {
         normalizedUrl = normalizedUrl.replace('http://', '');
       }
-      const domainExtensions = ['.com', '.org', '.net', '.edu', '.gov', '.io', '.co', '.in'];
+      const domainExtensions = ['.com', '.org', '.net', '.edu', '.gov', '.io', '.co', '.in', '.dev', '.xyz', '.app', '.tech', '.ai', '.me', '.info', '.biz', '.us', '.uk', '.ca', '.tv'];
       const hasValidExtension = domainExtensions.some(ext => normalizedUrl.endsWith(ext));
 
       if (!hasValidExtension) {
