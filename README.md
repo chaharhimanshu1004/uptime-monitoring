@@ -1,7 +1,7 @@
 # 📡 **Uptime Monitoring**
 
 > ⚠️ **Note:**  
-> Re-uploaded after deleting the original repository due to an accidental commit made using my company's laptop and email, which raised internal security concerns.
+> Re-uploaded this repository after ~40% code completion because I accidentally committed using my company's laptop and email, which raised internal security concerns.
 
 ---
 
