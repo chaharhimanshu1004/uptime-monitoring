@@ -1,6 +1,7 @@
 # 📡 **Uptime Monitoring**
 
-> **Note:** Re-uploaded after deleting the original repository due to an accidental commit made using my company's laptop and email, which raised internal security concerns.
+> ⚠️ **Note:**  
+> Re-uploaded after deleting the original repository due to an accidental commit made using my company's laptop and email, which raised internal security concerns.
 
 ---
 
@@ -22,18 +23,19 @@ This project consists of **two servers** working in synchronization:
    - Responsible for continuously checking the uptime status of registered websites.  
    - Performs monitoring tasks and triggers alerts when downtime is detected. 
 
-![Project Screenshot](assets/architecture.png)
-
 
 You can find the backend repo here:  
 [https://github.com/chaharhimanshu1004/uptime-worker-backend](https://github.com/chaharhimanshu1004/uptime-worker-backend)
+
+
+![Project Screenshot](assets/architecture.png)
 
 ---
 
 ## ⚙️ Tech Stacks
 
 1. Next.js  
-2. NextAuth.js (for authentication)  
+2. next-auth (for authentication)  
 3. Prisma ORM 
 4. Redis
 
