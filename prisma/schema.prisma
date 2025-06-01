@@ -30,7 +30,7 @@ model User {
 
 model Website {
   id              Int             @id @default(autoincrement())
-  url             String          @unique
+  url             String          
   userId          Int
   isPaused        Boolean         @default(false)
   isUp            Boolean         @default(false)
